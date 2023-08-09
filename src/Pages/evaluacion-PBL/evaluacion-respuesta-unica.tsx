@@ -13,6 +13,7 @@ import { IResultadoRespuesta } from '../../Services/Interface/resultadoRespuesta
 import moment from 'moment';
 import UseTest from '../hooks/useTest';
 import { useNavigate } from 'react-router-dom';
+import ModalFinalizar from '../../Components/ModalFinalizar/ModalFinalizar';
 
 const initialState: ITest = {
     nombreTest: '',
@@ -32,7 +33,8 @@ export const initialStateResultado: IResultadoTest = {
     respuestaPreguntas: []
 }
 const EvaluacionRespUnica = () => {
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+    const [modalFinalizar, setmodalFinalizar] = useState(false)
     const [loading, setLoading] = useState(true);
     const { id, testId } = useParams();
     const [test, setTest] = useState<ITest>(initialState);
@@ -148,10 +150,19 @@ const EvaluacionRespUnica = () => {
         values.respuestaPreguntas[indexPregunta].resultadoRespuestas.map((respuesta: IResultadoRespuesta) => {
             return respuesta.valor = '0';
         });
-        /*         console.log('limpiando respuestas', values.respuestaPreguntas[indexPregunta].resultadoRespuestas)
-                console.log('añadiendo respuesta', name) */
         setValues(values);
         setFieldValue(name, '1');
+    }
+
+    const handlerFinalizar = async (estado: boolean) => {
+        if (estado) {
+            setLoading(true)
+            await apiStore(values, parseInt(testId!), parseInt(id!));
+            setLoading(false)
+            navigate('/home')
+        } else {
+            setmodalFinalizar(false)
+        }
     }
     return (
         <>
@@ -187,7 +198,7 @@ const EvaluacionRespUnica = () => {
                                                                             const imagen = `${process.env.REACT_APP_API_PREGUNTA}${test.preguntas[i].imagen}` == ''
                                                                                 ? ImagenNoDisponible
                                                                                 : `${process.env.REACT_APP_API_PREGUNTA}${test.preguntas[i].imagen}`;
-                                                                            console.log(test.preguntas[i].imagen)
+
                                                                             return (
                                                                                 <Grid item xs={12} md={12} key={i}>
                                                                                     <Typography variant='subtitle1' >
@@ -265,11 +276,13 @@ const EvaluacionRespUnica = () => {
                                             <Divider sx={{ m: 1 }}></Divider>
                                             <div style={{ textAlign: 'center' }}>
                                                 <Button
-                                                    type='submit'
                                                     color='success'
                                                     size='small'
                                                     variant="contained"
                                                     sx={{ textTransform: 'none', mt: 1 }}
+                                                    onClick={() => {
+                                                        setmodalFinalizar(true)
+                                                    }}
                                                 >
                                                     Finalizar Prueba
                                                 </Button>
@@ -314,7 +327,13 @@ const EvaluacionRespUnica = () => {
                         </Card>
                     </Box>
                 </Grid>
+                <ModalFinalizar
+                    message='Esta seguro de finalizar este Test?'
+                    onClose={handlerFinalizar}
+                    openModal={modalFinalizar}
+                />
             </Grid>
+
         </>
     )
 }

@@ -49,7 +49,7 @@ const Home = () => {
 
         break;
       default:
-        route = '/404';
+        route = `/evaluacion-unica/${test_id}/${id}`;
     }
     return route;
   }
