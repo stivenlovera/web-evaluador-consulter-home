@@ -32,6 +32,7 @@ const Home = () => {
 
   const resolverUrl = (tipo_preguntas_id: number, test_id: number, id: number): string => {
     let route: string = '';
+    console.log('Data entrante..',tipo_preguntas_id)
     switch (tipo_preguntas_id) {
       case 1:
         route = `/evaluacion-CRT/${test_id}/${id}`;
@@ -45,8 +46,8 @@ const Home = () => {
       case 4:
         route = `/evaluacion-PBL/${test_id}/${id}`;
         break;
-      case 5:
-
+      case 7:
+        route = `/evaluacion-kuden/${test_id}/${id}`;
         break;
       default:
         route = `/evaluacion-unica/${test_id}/${id}`;
