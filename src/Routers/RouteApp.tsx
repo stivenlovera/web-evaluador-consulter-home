@@ -28,6 +28,7 @@ const EvalucionPBL = lazy(() => import('../Pages/evaluacion-PBL/evaluacion-pbl')
 const EvalucionCRT = lazy(() => import('../Pages/evaluacion-PBL/evaluacion-crt'));
 const EvaluacionRespUnica = lazy(() => import('../Pages/evaluacion-PBL/evaluacion-respuesta-unica'));
 const EvaluacionResKuden = lazy(() => import('../Pages/evaluacion-PBL/evaluacion-kuden'));
+const EvaluacionFactorG = lazy(() => import('../Pages/evaluacion-PBL/evaluacion-factor-g'));
 
 const RouteApp = () => {
     const [loading, setLoading] = useState(true);
@@ -90,7 +91,7 @@ const RouteApp = () => {
                         <Route path="/evaluacion-CRT/:testId/:id" element={<EvalucionCRT />}></Route>
                         <Route path="/evaluacion-unica/:testId/:id" element={<EvaluacionRespUnica />}></Route>
                         <Route path="/evaluacion-kuden/:testId/:id" element={<EvaluacionResKuden />}></Route>
-                        
+                        <Route path="/evaluacion-factor-g/:testId/:id" element={<EvaluacionFactorG />}></Route>
                     </Route>
                     <Route path='/Authenticador' element={
                         <NoProtectorRoute valid={token} redirrecTo={'/inicio'}>
