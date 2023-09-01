@@ -1,7 +1,7 @@
 import { Backdrop, Box, Button, Card, CardContent, CardMedia, CircularProgress, Divider, Grid, TextField, Typography } from '@mui/material'
 import React, { useEffect, useRef, useState } from 'react'
 import { useParams } from "react-router-dom";
-import { ITest } from '../../Services/Interface/ITest';
+import { ITest, initialStateTest } from '../../Services/Interface/ITest';
 import { TestCreateService } from '../../Services/test';
 import { enqueueSnackbar } from 'notistack';
 import ImagenNoDisponible from '../../assets/imagenes/no-disponible.png'
@@ -15,17 +15,6 @@ import moment from 'moment';
 import UseTest from '../hooks/useTest';
 import { useNavigate } from 'react-router-dom';
 
-const initialState: ITest = {
-    nombreTest: '',
-    completado: '',
-    test_id: 0,
-    tiempo_total: 0,
-    tipo_preguntas_id: 0,
-    descripcion_test: '',
-    pasos: [],
-    preguntas: [],
-    procedimiento: ''
-}
 export const initialStateResultado: IResultadoTest = {
     fecha_inicio: '',
     resultado_test_id: 0,
@@ -35,11 +24,11 @@ export const initialStateResultado: IResultadoTest = {
 const EvaluacionCrt = () => {
     const navigate = useNavigate()
     const [loading, setLoading] = useState(true);
-    const { id, testId } = useParams();
-    const [test, setTest] = useState<ITest>(initialState);
+    const { id, testId,evaluacion_id } = useParams();
+    const [test, setTest] = useState<ITest>(initialStateTest);
     const myRefname = useRef<HTMLInputElement>(null);
 
-    const { apiCreateCRT, apiStore } = UseTest();
+    const { apiCreate, apiStore } = UseTest();
 
     const procesarData = (test: ITest) => {
         let initialStateResultado: IResultadoTest = {
@@ -75,7 +64,7 @@ const EvaluacionCrt = () => {
 
     const Index = async () => {
         setLoading(true);
-        const { data, status } = await apiCreateCRT(parseInt(testId!), parseInt(id!));
+        const { data, status } = await apiCreate(parseInt(testId!), parseInt(id!), parseInt(evaluacion_id!));
         if (status) {
             if (data?.completado == 'si') {
                 enqueueSnackbar('Test ya fue registrado', { variant: 'error' })

@@ -9,6 +9,7 @@ import { SelectToken } from '../../Reducers/Slices/LoginSlice';
 import { UseHome } from './hooks/useHome';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { useNavigate } from 'react-router-dom';
+import ModalIniciar from '../../Components/ModalIniciar/modal-iniciar';
 
 interface TipoEvaluacion {
   id: number;
@@ -16,9 +17,14 @@ interface TipoEvaluacion {
 }
 
 const Home = () => {
+  const [modalIniciar, setmodalIniciar] = useState(false)
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const { apiLisTest, informacion } = UseHome();
+  const [iniciarTest, setIniciarTest] = useState({
+    url: '',
+    message: ''
+  })
 
   const token = useSelector(SelectToken);
 
@@ -30,30 +36,30 @@ const Home = () => {
     }
   }
 
-  const resolverUrl = (tipo_preguntas_id: number, test_id: number, id: number): string => {
+  const resolverUrl = (tipo_preguntas_id: number, test_id: number, id: number, evaluacion_id: number): string => {
     let route: string = '';
     console.log('Data entrante..', tipo_preguntas_id)
     switch (tipo_preguntas_id) {
       case 1:
-        route = `/evaluacion-CRT/${test_id}/${id}`;
+        route = `/evaluacion-CRT/${test_id}/${id}/${evaluacion_id}`;
         break
       case 2:
-        route = `/evaluacion-unica/${test_id}/${id}`;
+        route = `/evaluacion-unica/${test_id}/${id}/${evaluacion_id}`;
         break
       case 3:
-        route = `/evaluacion-unica/${test_id}/${id}`;
+        route = `/evaluacion-unica/${test_id}/${id}/${evaluacion_id}`;
         break
       case 4:
-        route = `/evaluacion-PBL/${test_id}/${id}`;
+        route = `/evaluacion-PBL/${test_id}/${id}/${evaluacion_id}`;
         break;
       case 7:
-        route = `/evaluacion-kuden/${test_id}/${id}`;
+        route = `/evaluacion-kuden/${test_id}/${id}/${evaluacion_id}`;
         break;
       case 11:
-        route = `/evaluacion-factor-g/${test_id}/${id}`;
+        route = `/evaluacion-factor-g/${test_id}/${id}/${evaluacion_id}`;
         break;
       default:
-        route = `/evaluacion-unica/${test_id}/${id}`;
+        route = `/evaluacion-unica/${test_id}/${id}/${evaluacion_id}`;
     }
     return route;
   }
@@ -61,6 +67,15 @@ const Home = () => {
     LoadTest();
   }, [token])
 
+  const handlerIniciar = (valor: boolean) => {
+    if (valor) {
+      navigate(iniciarTest.url)
+      setmodalIniciar(false);
+    }
+    else {
+      setmodalIniciar(false);
+    }
+  }
   return (
     <>
       <Backdrop
@@ -88,10 +103,6 @@ const Home = () => {
                 informacion.test.map((test, i) => {
                   return test.completado == 'no' ? (
                     <ListItemButton
-                      onClick={() => {
-                        navigate(resolverUrl(test.tipo_preguntas_id, test.test_id, informacion.id))
-                        console.log(resolverUrl(test.tipo_preguntas_id, test.test_id, informacion.id))
-                      }}
                       key={i}
                     >
                       <div style={{ border: '1px solid #22A9DF', padding: 10, margin: 10, width: '100%' }}>
@@ -102,7 +113,29 @@ const Home = () => {
                           {
                             test.tiempo_total == 0 ? (null) : (<Chip label={`Duracion ${test.tiempo_total} min.`} color="primary" style={{ margin: 3 }} />)
                           }
-                          <Chip label={'Iniciar Test'} color="success" style={{ margin: 3 }} icon={<PlayArrowIcon />} />
+                          <Chip
+                            label={'Prueba demo'}
+                            color="default"
+                            style={{ margin: 3 }}
+                            icon={<PlayArrowIcon />}
+                            onClick={() => {
+                              //navigate(resolverUrl(test.tipo_preguntas_id, test.test_id, informacion.id))
+                              console.log(resolverUrl(test.tipo_preguntas_id, test.test_id, informacion.id,informacion.evaluacion_id))
+                            }} />
+                          <Chip
+                            label={'INICIAR'}
+                            color="success"
+                            style={{ margin: 3 }}
+                            icon={<PlayArrowIcon />}
+                            onClick={() => {
+                              setmodalIniciar(true)
+                              setIniciarTest({
+                                url: resolverUrl(test.tipo_preguntas_id, test.test_id, informacion.id, informacion.evaluacion_id),
+                                message: `Esta seguro de iniciar este test?, tiene un tiempo de ${test.tiempo_total} min.`
+                              })
+                              console.log()
+                            }}
+                          />
                         </Box>
                       </div>
                     </ListItemButton>
@@ -142,6 +175,11 @@ const Home = () => {
           </Card>
         </Grid>
       </Grid >
+      <ModalIniciar
+        message={iniciarTest.message}
+        onClose={handlerIniciar}
+        openModal={modalIniciar}
+      />
     </>
   )
 }

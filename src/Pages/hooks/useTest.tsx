@@ -3,32 +3,9 @@ import { TestCreateService, TestStoreService } from "../../Services/test";
 import { IResultadoTest } from "../../Services/Interface/resultadoTest";
 
 const UseTest = () => {
-    const apiCreatePBL = async (testId: number, postulanteId: number) => {
+    const apiCreate = async (testId: number, postulanteId: number, evaluacion_id: number) => {
         try {
-            const { data } = await TestCreateService(testId, postulanteId);
-            if (data.status == 1) {
-                return {
-                    status: !!data.status,
-                    data: data.data
-                };
-            } else {
-                enqueueSnackbar(data.message, { variant: 'error' });
-                return {
-                    status: !!data.status,
-                    data: null
-                };
-            }
-        } catch (error) {
-            enqueueSnackbar('Ocurio un error', { variant: 'error' });
-            return {
-                status: false,
-                data: null
-            };
-        }
-    }
-    const apiCreateCRT = async (testId: number, postulanteId: number) => {
-        try {
-            const { data } = await TestCreateService(testId, postulanteId);
+            const { data } = await TestCreateService(testId, postulanteId,evaluacion_id);
             if (data.status == 1) {
                 return {
                     status: !!data.status,
@@ -74,8 +51,7 @@ const UseTest = () => {
         }
     }
     return {
-        apiCreatePBL,
-        apiCreateCRT,
+        apiCreate,
         apiStore
     }
 }

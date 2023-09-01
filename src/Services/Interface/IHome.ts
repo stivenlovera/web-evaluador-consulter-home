@@ -12,4 +12,5 @@ export interface IInformacion {
     cargo: string;
     fechaFinal: string;
     fechaInicio: string;
+    evaluacion_id: number;
 }

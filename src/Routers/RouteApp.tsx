@@ -87,11 +87,11 @@ const RouteApp = () => {
                 <Routes>
                     <Route element={<ProtectorRoute valid={token} children redirrecTo={'/Authenticador'} nombreCompleto={authenticacion.nombreCompleto} perfil={'no-foto.jpg'} />}>
                         <Route path="/home" element={<Home />}></Route>
-                        <Route path="/evaluacion-PBL/:testId/:id" element={<EvalucionPBL />}></Route>
-                        <Route path="/evaluacion-CRT/:testId/:id" element={<EvalucionCRT />}></Route>
-                        <Route path="/evaluacion-unica/:testId/:id" element={<EvaluacionRespUnica />}></Route>
-                        <Route path="/evaluacion-kuden/:testId/:id" element={<EvaluacionResKuden />}></Route>
-                        <Route path="/evaluacion-factor-g/:testId/:id" element={<EvaluacionFactorG />}></Route>
+                        <Route path="/evaluacion-PBL/:testId/:id/:evaluacion_id" element={<EvalucionPBL />}></Route>
+                        <Route path="/evaluacion-CRT/:testId/:id/:evaluacion_id" element={<EvalucionCRT />}></Route>
+                        <Route path="/evaluacion-unica/:testId/:id/:evaluacion_id" element={<EvaluacionRespUnica />}></Route>
+                        <Route path="/evaluacion-kuden/:testId/:id/:evaluacion_id" element={<EvaluacionResKuden />}></Route>
+                        <Route path="/evaluacion-factor-g/:testId/:id/:evaluacion_id" element={<EvaluacionFactorG />}></Route>
                     </Route>
                     <Route path='/Authenticador' element={
                         <NoProtectorRoute valid={token} redirrecTo={'/inicio'}>

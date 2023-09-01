@@ -1,16 +1,17 @@
 import { enqueueSnackbar } from "notistack";
 import { useContext, useState } from "react";
 import { HomeService } from "../../../Services/home";
-import {  IInformacion } from "../../../Services/Interface/IHome";
+import { IInformacion } from "../../../Services/Interface/IHome";
 
 export const UseHome = () => {
     const [informacion, setInformacion] = useState<IInformacion>({
-        id:0,
+        id: 0,
         cargo: '',
         nombreCompleto: '',
         test: [],
         fechaFinal: '',
-        fechaInicio: ''
+        fechaInicio: '',
+        evaluacion_id: 0
     });
 
     const apiLisTest = async () => {
@@ -19,7 +20,7 @@ export const UseHome = () => {
             if (data.status == 1) {
                 setInformacion(data.data)
                 return !!data.status;
-                
+
             } else {
                 enqueueSnackbar(data.message, { variant: 'error' });
                 return !!data.status;

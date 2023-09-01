@@ -4,9 +4,9 @@ import { IResponse } from "./Interface/IResponse";
 import { ITest } from "./Interface/ITest";
 import { IResultadoTest } from "./Interface/resultadoTest";
 AxiosRequest();
-export async function TestCreateService(testId: number, postulante: number) {
-    return await axios.get<IResponse<ITest>>(`${process.env.REACT_APP_API_CONSULTER_HOME}/api/test-resultado/create/${testId}/${postulante}`);
+export async function TestCreateService(testId: number, postulante: number, evaluacion_id: number) {
+    return await axios.get<IResponse<ITest>>(`${process.env.REACT_APP_API_CONSULTER_HOME}/api/test-resultado/create/${testId}/${postulante}/${evaluacion_id}`);
 }
-export async function TestStoreService(values:IResultadoTest,testId: number, postulante: number) {
-    return await axios.post<IResponse<ITest>>(`${process.env.REACT_APP_API_CONSULTER_HOME}/api/test-resultado/${testId}/${postulante}`,values);
+export async function TestStoreService(values: IResultadoTest, testId: number, postulante: number) {
+    return await axios.post<IResponse<ITest>>(`${process.env.REACT_APP_API_CONSULTER_HOME}/api/test-resultado/${testId}/${postulante}`, values);
 }
