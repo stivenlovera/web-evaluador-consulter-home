@@ -4,4 +4,5 @@ export interface IResultadoRespuesta {
     respuesta_id: number;
     descripcion: string;
     valor: string;
+    imagen: string;
 }

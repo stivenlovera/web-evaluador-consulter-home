@@ -14,7 +14,7 @@ import moment from 'moment';
 import UseTest from '../hooks/useTest';
 import { useNavigate } from 'react-router-dom';
 import ModalFinalizar from '../../Components/ModalFinalizar/ModalFinalizar';
-import { useTimer } from 'react-timer-hook';
+import Timer from '../../Components/Timer/Timer';
 
 export const initialStateResultado: IResultadoTest = {
     fecha_inicio: '',
@@ -23,30 +23,14 @@ export const initialStateResultado: IResultadoTest = {
     respuestaPreguntas: []
 }
 const EvaluacionFactorG = () => {
-    const [tiempo, setTiempo] = useState({
-        inicio: 0,
-        trasncurrido: 0
-    })
-    const {
-        totalSeconds,
-        seconds,
-        minutes,
-        hours,
-        days,
-        isRunning,
-        start,
-        pause,
-        resume,
-        restart,
-    } = useTimer({ expiryTimestamp: moment().add(tiempo.trasncurrido, 'second').toDate(), onExpire: () => console.warn('onExpire called') });
+    const [transcurrido, setTranscurrido] = useState(0)
+    const [iniciar, setIniciar] = useState(false);
 
     const navigate = useNavigate();
     const [modalFinalizar, setmodalFinalizar] = useState(false)
     const [loading, setLoading] = useState(true);
     const { id, testId, evaluacion_id } = useParams();
     const [test, setTest] = useState<ITest>(initialStateTest);
-
-
     const { apiCreate, apiStore } = UseTest();
 
     const procesarData = (test: ITest) => {
@@ -72,7 +56,9 @@ const EvaluacionFactorG = () => {
                     respuesta_id: respuesta.respuesta_id,
                     resultado_pregunta_id: 0,
                     resultado_respuesta_id: 0,
-                    valor: '0'
+                    valor: '0',
+                    imagen: ''
+
                 }
                 resultadoPregunta.resultadoRespuestas.push(respuestaRespuesta);
             })
@@ -85,16 +71,16 @@ const EvaluacionFactorG = () => {
         setLoading(true);
         const { data, status } = await apiCreate(parseInt(testId!), parseInt(id!), parseInt(evaluacion_id!));
         if (status) {
-            let hi = data?.fecha_inicio
-            let hf = data?.fecha_sistema
-            // Crear instancias de moment
-            const momentHi = moment(hi)
-            const momentHf = moment(hf)
-            let diferenciaEnSegundo = momentHf.diff(momentHi, "second")
-            const formatted = moment.utc(diferenciaEnSegundo * 1000).format('HH:mm:ss');
-            console.log('seg trancurridos', diferenciaEnSegundo)
+            const momentInicio = moment(data!.fecha_inicio)
+            const momentSistema = moment(data!.fecha_sistema)
+            const diferencia = momentInicio.diff(momentInicio, "second");
+            const formatted = moment.utc(diferencia * 1000).format('HH:mm:ss');
+            setTranscurrido(momentSistema.diff(momentInicio, "second"));
+
+            console.log('seg trancurridos', diferencia)
             console.log('TIEMPO DE DIFERENCIA ', formatted)
-            setTiempo({ trasncurrido: diferenciaEnSegundo, inicio: 0 })
+            setIniciar(true)
+            /* restart(new Date(formatted), true) */
             if (data?.completado == 'si') {
                 enqueueSnackbar('Test ya fue registrado', { variant: 'error' })
                 navigate('/home')
@@ -106,9 +92,9 @@ const EvaluacionFactorG = () => {
         }
         setLoading(false);
     }
+
     useEffect(() => {
         Index();
-        start();
     }, [])
 
     const validationSchema = Yup.object().shape({
@@ -192,7 +178,11 @@ const EvaluacionFactorG = () => {
                     <Card variant="outlined">
                         <React.Fragment>
                             <CardContent>
-                                {hours}:{minutes}:{seconds}
+                                <Timer
+                                    expiryTimestamp={moment().add(transcurrido, 'second').toDate()}
+                                    iniciar={iniciar}
+                                    onExpire={() => { navigate('/home') }}
+                                ></Timer>
                             </CardContent>
                         </React.Fragment>
                     </Card>
@@ -242,6 +232,11 @@ const EvaluacionFactorG = () => {
                                                                                     }
                                                                                     {
                                                                                         <Grid container spacing={2}>
+                                                                                            <Grid item xs={12} md={12} >
+                                                                                                <br />
+                                                                                                <br />
+
+                                                                                            </Grid>
                                                                                             <FieldArray
                                                                                                 name="resultadoRespuestas"
                                                                                                 render={arrayresultadoRespuestas => {
@@ -250,13 +245,18 @@ const EvaluacionFactorG = () => {
                                                                                                         <>
                                                                                                             {resultadoResultado && resultadoResultado.length > 0 ? (
                                                                                                                 resultadoResultado.map((respuesta: IResultadoRespuesta, index: number) => {
-
-                                                                                                                    const imagen = `${process.env.REACT_APP_API_RESPUESTA}${values.respuestaPreguntas[i].resultadoRespuestas[index].descripcion}` == ''
+                                                                                                                    const imagenRespuesta = `${process.env.REACT_APP_API_RESPUESTA}${test.preguntas[i].respuestas[index].imagen}` == ''
                                                                                                                         ? ImagenNoDisponible
-                                                                                                                        : `${process.env.REACT_APP_API_RESPUESTA}${values.respuestaPreguntas[i].resultadoRespuestas[index].descripcion}`;
+                                                                                                                        : `${process.env.REACT_APP_API_RESPUESTA}${test.preguntas[i].respuestas[index].imagen}`;
                                                                                                                     return (
-                                                                                                                        <Grid item xs={12} md={12} key={index} style={{ paddingTop: 0, paddingLeft: 30 }} >
+                                                                                                                        <Grid item xs={2} md={2} key={index} style={{ paddingTop: 0 }} >
                                                                                                                             <div>
+                                                                                                                                <CardMedia
+                                                                                                                                    style={{ maxWidth: '80%', margin: 'auto' }}
+                                                                                                                                    component="img"
+                                                                                                                                    image={`${imagenRespuesta}`}
+                                                                                                                                    alt=""
+                                                                                                                                />
                                                                                                                                 <FormControlLabel value="" control={
                                                                                                                                     <Radio
                                                                                                                                         checked={values.respuestaPreguntas[i].resultadoRespuestas[index].valor === '1'}
@@ -264,19 +264,8 @@ const EvaluacionFactorG = () => {
                                                                                                                                         value={values.respuestaPreguntas[i].resultadoRespuestas[index].valor}
                                                                                                                                         name={`respuestaPreguntas[${i}].resultadoRespuestas[${index}].valor`}
                                                                                                                                         inputProps={{ 'aria-label': '1' }}
-
                                                                                                                                     />
                                                                                                                                 } label={test.preguntas[i].respuestas[index].descripcion} />
-                                                                                                                                {/* <TextField
-                                                                                                                                    fullWidth
-                                                                                                                                    label={test.preguntas[i].respuestas[index].descripcion}
-                                                                                                                                    variant="filled"
-                                                                                                                                    size='small'
-                                                                                                                                    name={`respuestaPreguntas[${i}].resultadoRespuestas[${index}].descripcion`}
-                                                                                                                                    value={values.respuestaPreguntas[i].resultadoRespuestas[index].descripcion}
-                                                                                                                                    onChange={handleChange}
-                                                                                                                                    onBlur={handleBlur}
-                                                                                                                                    /> */}
                                                                                                                             </div>
                                                                                                                         </Grid>)
                                                                                                                 })) : null}

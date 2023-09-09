@@ -55,7 +55,8 @@ const EvaluacionRespKuden = () => {
                     respuesta_id: respuesta.respuesta_id,
                     resultado_pregunta_id: 0,
                     resultado_respuesta_id: 0,
-                    valor: '0'
+                    valor: '0',
+                    imagen:''
                 }
                 resultadoPregunta.resultadoRespuestas.push(respuestaRespuesta);
             })

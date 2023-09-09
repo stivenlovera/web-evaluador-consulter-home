@@ -52,7 +52,8 @@ const EvaluacionPbl = () => {
                     respuesta_id: respuesta.respuesta_id,
                     resultado_pregunta_id: 0,
                     resultado_respuesta_id: 0,
-                    valor: respuesta.valor
+                    valor: respuesta.valor,
+                    imagen:''
                 }
                 resultadoPregunta.resultadoRespuestas.push(respuestaRespuesta);
             })
