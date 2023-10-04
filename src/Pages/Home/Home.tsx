@@ -10,6 +10,7 @@ import { UseHome } from './hooks/useHome';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { useNavigate } from 'react-router-dom';
 import ModalIniciar from '../../Components/ModalIniciar/modal-iniciar';
+import moment from 'moment';
 
 interface TipoEvaluacion {
   id: number;
@@ -58,8 +59,22 @@ const Home = () => {
       case 11:
         route = `/evaluacion-factor-g/${test_id}/${id}/${evaluacion_id}`;
         break;
+      case 12:
+        route = `/evaluacion-colores/${test_id}/${id}/${evaluacion_id}`;
+        break;
       default:
         route = `/evaluacion-unica/${test_id}/${id}/${evaluacion_id}`;
+    }
+    return route;
+  }
+  const resolverEjemploUrl = (tipo_preguntas_id: number, test_id: number, id: number, evaluacion_id: number): string => {
+    let route: string = '';
+    switch (tipo_preguntas_id) {
+      case 11:
+        route = `/evaluacion-factor-g-ejemplo/${test_id}/${id}/${evaluacion_id}`;
+        break;
+      default:
+        route = `#`;
     }
     return route;
   }
@@ -111,17 +126,21 @@ const Home = () => {
                             {test.nombreTest}
                           </Typography>
                           {
-                            test.tiempo_total == 0 ? (null) : (<Chip label={`Duracion ${test.tiempo_total} min.`} color="primary" style={{ margin: 3 }} />)
+                            test.tiempo_total == 0 ? (null) : (<Chip label={`Duracion ${test.completado == 'no' ? (moment.utc(test.tiempo_total * 1000).format('HH:mm:ss')) : null}`} color="primary" style={{ margin: 3 }} />)
                           }
-                          <Chip
-                            label={'Prueba demo'}
-                            color="default"
-                            style={{ margin: 3 }}
-                            icon={<PlayArrowIcon />}
-                            onClick={() => {
-                              //navigate(resolverUrl(test.tipo_preguntas_id, test.test_id, informacion.id))
-                              console.log(resolverUrl(test.tipo_preguntas_id, test.test_id, informacion.id,informacion.evaluacion_id))
-                            }} />
+                          {
+                            test.ejemplo_test_id != 0 ? (
+                              <Chip
+                                label={'Ver explicacion'}
+                                color="default"
+                                style={{ margin: 3 }}
+                                icon={<PlayArrowIcon />}
+                                onClick={() => {
+                                  navigate(resolverEjemploUrl(test.tipo_preguntas_id, test.ejemplo_test_id, informacion.id, informacion.evaluacion_id))
+                                  //console.log(resolverEjemploUrl(test.tipo_preguntas_id, test.ejemplo_test_id, informacion.id, informacion.evaluacion_id))
+                                }} />
+                            ) : null
+                          }
                           <Chip
                             label={'INICIAR'}
                             color="success"
@@ -129,11 +148,17 @@ const Home = () => {
                             icon={<PlayArrowIcon />}
                             onClick={() => {
                               setmodalIniciar(true)
+                              //verificar tiempo
+                              let message = '';
+                              if (test.tiempo_total == 0) {
+                                message = `Esta seguro de iniciar este test?`
+                              } else {
+                                message = `Esta seguro de iniciar este test?, tiene un tiempo de ${test.completado == 'no' ? (moment.utc(test.tiempo_total * 1000).format('HH:mm:ss')) : null}`
+                              }
                               setIniciarTest({
                                 url: resolverUrl(test.tipo_preguntas_id, test.test_id, informacion.id, informacion.evaluacion_id),
-                                message: `Esta seguro de iniciar este test?, tiene un tiempo de ${test.tiempo_total} min.`
+                                message: message
                               })
-                              console.log()
                             }}
                           />
                         </Box>
@@ -162,9 +187,9 @@ const Home = () => {
                           <Typography sx={{ flexGrow: 1 }} style={{ margin: 3 }} variant='subtitle1' gutterBottom align='left'>
                             {test.nombreTest}
                           </Typography>
-                          {
-                            test.tiempo_total == 0 ? (null) : (<Chip label={`Duracion ${test.tiempo_total} min.`} color="primary" style={{ margin: 3 }} />)
-                          }
+                          {/*  {
+                            test.tiempo_total == 0 ? (null) : (<Chip label={`Duracion ${test.completado == 'si' ? (moment.utc(test.tiempo_total * 1000).format('HH:mm:ss')) : ''}`} color="primary" style={{ margin: 3 }} />)
+                          } */}
                         </Box>
                       </div>
                     </ListItemButton>

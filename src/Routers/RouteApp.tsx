@@ -7,6 +7,7 @@ import { SelectToken, setToken } from '../Reducers/Slices/LoginSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import UseRedirrect from '../Pages/NoAuthenticado/hooks/use-redirrect';
 import { VerificarAuthenticacionService } from '../Services/authenticacion';
+
 const mdTheme = createTheme(
     {
         components: {
@@ -29,7 +30,8 @@ const EvalucionCRT = lazy(() => import('../Pages/evaluacion-PBL/evaluacion-crt')
 const EvaluacionRespUnica = lazy(() => import('../Pages/evaluacion-PBL/evaluacion-respuesta-unica'));
 const EvaluacionResKuden = lazy(() => import('../Pages/evaluacion-PBL/evaluacion-kuden'));
 const EvaluacionFactorG = lazy(() => import('../Pages/evaluacion-PBL/evaluacion-factor-g'));
-
+const EvaluacionColores = lazy(() => import('../Pages/evaluacion-PBL/evaluacion-colores'));
+const EvaluacionFactorGEjemplo = lazy(() => import('../Pages/evaluacion-PBL/ejemplo-factor-g'));
 const RouteApp = () => {
     const [loading, setLoading] = useState(true);
     const [searchParams] = useSearchParams();
@@ -92,6 +94,9 @@ const RouteApp = () => {
                         <Route path="/evaluacion-unica/:testId/:id/:evaluacion_id" element={<EvaluacionRespUnica />}></Route>
                         <Route path="/evaluacion-kuden/:testId/:id/:evaluacion_id" element={<EvaluacionResKuden />}></Route>
                         <Route path="/evaluacion-factor-g/:testId/:id/:evaluacion_id" element={<EvaluacionFactorG />}></Route>
+                        <Route path="/evaluacion-colores/:testId/:id/:evaluacion_id" element={<EvaluacionColores />}></Route>
+                        <Route path="/evaluacion-factor-g-ejemplo/:testId/:id/:evaluacion_id" element={<EvaluacionFactorGEjemplo />}></Route>
+                        
                     </Route>
                     <Route path='/Authenticador' element={
                         <NoProtectorRoute valid={token} redirrecTo={'/inicio'}>

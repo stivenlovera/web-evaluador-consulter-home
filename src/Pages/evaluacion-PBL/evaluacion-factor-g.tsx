@@ -23,7 +23,7 @@ export const initialStateResultado: IResultadoTest = {
     respuestaPreguntas: []
 }
 const EvaluacionFactorG = () => {
-    const [transcurrido, setTranscurrido] = useState(0)
+    const [transcurrido, setTranscurrido] = useState<number>(0)
     const [iniciar, setIniciar] = useState(false);
 
     const navigate = useNavigate();
@@ -37,7 +37,7 @@ const EvaluacionFactorG = () => {
         let initialStateResultado: IResultadoTest = {
             fecha_inicio: moment().format('YYYY-MM-DD HH:mm:ss'),
             respuestaPreguntas: [],
-            resultado_test_id: 0,
+            resultado_test_id: test.resultado_test_id,
             test_id: test.test_id
         }
 
@@ -71,15 +71,8 @@ const EvaluacionFactorG = () => {
         setLoading(true);
         const { data, status } = await apiCreate(parseInt(testId!), parseInt(id!), parseInt(evaluacion_id!));
         if (status) {
-            const momentInicio = moment(data!.fecha_inicio)
-            const momentSistema = moment(data!.fecha_sistema)
-            const diferencia = momentInicio.diff(momentInicio, "second");
-            const formatted = moment.utc(diferencia * 1000).format('HH:mm:ss');
-            setTranscurrido(momentSistema.diff(momentInicio, "second"));
-
-            console.log('seg trancurridos', diferencia)
-            console.log('TIEMPO DE DIFERENCIA ', formatted)
-            setIniciar(true)
+            setTranscurrido(data!.tiempoTranscurrido);
+            setIniciar(data!.activarTiempo);
             /* restart(new Date(formatted), true) */
             if (data?.completado == 'si') {
                 enqueueSnackbar('Test ya fue registrado', { variant: 'error' })
@@ -125,12 +118,12 @@ const EvaluacionFactorG = () => {
         validationSchema,
         onSubmit: async (values) => {
             console.log('enviar', values);
-            await apiStore(values, parseInt(testId!), parseInt(id!));
-            navigate('/home')
+            await handlerFinalizar()
         }
     });
     const {
         values,
+        isValid,
         errors,
         handleChange,
         handleSubmit,
@@ -147,22 +140,29 @@ const EvaluacionFactorG = () => {
         setFieldValue(`respuestaPreguntas[${indexRespuesta}].resultadoRespuestas[${indexRespuesta}].descripcion`, converImagen);
         console.log(values.respuestaPreguntas[indexPregunta].resultadoRespuestas[indexRespuesta].descripcion)
     }
-    const seleccionUnica = (name: string, indexPregunta: number, valor: string) => {
+    const seleccionUnica = (indexPregunta: number, indexRespuesta: number, descripcion: string) => {
         values.respuestaPreguntas[indexPregunta].resultadoRespuestas.map((respuesta: IResultadoRespuesta) => {
-            return respuesta.valor = '0';
+            respuesta.valor = '0';
         });
+
         setValues(values);
-        setFieldValue(name, '1');
+        setFieldValue(`respuestaPreguntas[${indexPregunta}].resultadoRespuestas[${indexRespuesta}].valor`, '1');
+        setFieldValue(`respuestaPreguntas[${indexPregunta}].resultadoRespuestas[${indexRespuesta}].descripcion`, descripcion);
     }
 
-    const handlerFinalizar = async (estado: boolean) => {
-        if (estado) {
+    const handlerFinalizar = async () => {
+        if (isValid) {
             setLoading(true)
-            await apiStore(values, parseInt(testId!), parseInt(id!));
-            setLoading(false)
-            navigate('/home')
-        } else {
             setmodalFinalizar(false)
+            const { data, status } = await apiStore(values, parseInt(testId!), parseInt(id!));
+            if (status) {
+                setLoading(false)
+             
+                navigate('/home')
+            }
+        }
+        else {
+
         }
     }
     return (
@@ -181,7 +181,7 @@ const EvaluacionFactorG = () => {
                                 <Timer
                                     expiryTimestamp={moment().add(transcurrido, 'second').toDate()}
                                     iniciar={iniciar}
-                                    onExpire={() => { navigate('/home') }}
+                                    onExpire={() => { handlerFinalizar() }}
                                 ></Timer>
                             </CardContent>
                         </React.Fragment>
@@ -222,7 +222,7 @@ const EvaluacionFactorG = () => {
                                                                                     {
                                                                                         test.preguntas[i].imagen != '' ? (
                                                                                             <CardMedia
-                                                                                                style={{ maxWidth: '80%', margin: 'auto' }}
+                                                                                                style={{ maxWidth: '50%', margin: 'auto' }}
                                                                                                 component="img"
                                                                                                 image={imagen}
                                                                                                 alt="Paella dish"
@@ -248,26 +248,38 @@ const EvaluacionFactorG = () => {
                                                                                                                     const imagenRespuesta = `${process.env.REACT_APP_API_RESPUESTA}${test.preguntas[i].respuestas[index].imagen}` == ''
                                                                                                                         ? ImagenNoDisponible
                                                                                                                         : `${process.env.REACT_APP_API_RESPUESTA}${test.preguntas[i].respuestas[index].imagen}`;
+
                                                                                                                     return (
-                                                                                                                        <Grid item xs={2} md={2} key={index} style={{ paddingTop: 0 }} >
-                                                                                                                            <div>
-                                                                                                                                <CardMedia
-                                                                                                                                    style={{ maxWidth: '80%', margin: 'auto' }}
-                                                                                                                                    component="img"
-                                                                                                                                    image={`${imagenRespuesta}`}
-                                                                                                                                    alt=""
-                                                                                                                                />
-                                                                                                                                <FormControlLabel value="" control={
-                                                                                                                                    <Radio
-                                                                                                                                        checked={values.respuestaPreguntas[i].resultadoRespuestas[index].valor === '1'}
-                                                                                                                                        onChange={() => { seleccionUnica(`respuestaPreguntas[${i}].resultadoRespuestas[${index}].valor`, i, test.preguntas[i].respuestas[index].valor) }}
-                                                                                                                                        value={values.respuestaPreguntas[i].resultadoRespuestas[index].valor}
-                                                                                                                                        name={`respuestaPreguntas[${i}].resultadoRespuestas[${index}].valor`}
-                                                                                                                                        inputProps={{ 'aria-label': '1' }}
+                                                                                                                        <Grid item xl={2} lg={2} md={2} sm={2} xs={4} key={index} >
+
+                                                                                                                            <Card
+                                                                                                                                sx={{ background: (values.respuestaPreguntas[i].resultadoRespuestas[index].valor === '1' ? ('#EDEDED') : ('white')) }}
+                                                                                                                                onClick={() => { seleccionUnica(i, index, test.preguntas[i].respuestas[index].descripcion) }}
+                                                                                                                            >
+                                                                                                                                <CardContent style={{ padding: 5 }}>
+                                                                                                                                    <CardMedia
+                                                                                                                                        style={{ maxWidth: '80%', margin: 'auto', }}
+                                                                                                                                        component="img"
+                                                                                                                                        image={`${imagenRespuesta}`}
+                                                                                                                                        alt=""
+
                                                                                                                                     />
-                                                                                                                                } label={test.preguntas[i].respuestas[index].descripcion} />
-                                                                                                                            </div>
-                                                                                                                        </Grid>)
+                                                                                                                                    <Box sx={{ textAlign: 'center' }}>
+                                                                                                                                        <FormControlLabel value="" control={
+                                                                                                                                            <Radio
+                                                                                                                                                checked={values.respuestaPreguntas[i].resultadoRespuestas[index].valor === '1'}
+                                                                                                                                                onChange={() => {
+                                                                                                                                                    seleccionUnica(i, index, test.preguntas[i].respuestas[index].descripcion)
+                                                                                                                                                }}
+                                                                                                                                                value={values.respuestaPreguntas[i].resultadoRespuestas[index].valor}
+                                                                                                                                                name={`respuestaPreguntas[${i}].resultadoRespuestas[${index}].valor`}
+                                                                                                                                                inputProps={{ 'aria-label': '1' }}
+                                                                                                                                            />
+                                                                                                                                        } label={test.preguntas[i].respuestas[index].descripcion} />
+                                                                                                                                    </Box>
+                                                                                                                                </CardContent>
+                                                                                                                            </Card>
+                                                                                                                        </Grid >)
                                                                                                                 })) : null}
                                                                                                         </>
                                                                                                     )
@@ -276,7 +288,7 @@ const EvaluacionFactorG = () => {
 
                                                                                         </Grid>
                                                                                     }
-                                                                                </Grid>
+                                                                                </Grid >
                                                                             )
                                                                         })
                                                                     ) : null
@@ -342,11 +354,17 @@ const EvaluacionFactorG = () => {
                 </Grid>
                 <ModalFinalizar
                     message='Esta seguro de finalizar este Test?'
-                    onClose={handlerFinalizar}
+                    onClose={(estado) => {
+                        console.log(estado)
+                        if (estado) {
+                            handlerFinalizar()
+                        }else{
+                            setmodalFinalizar(false);
+                        }
+                    }}
                     openModal={modalFinalizar}
                 />
-            </Grid>
-
+            </Grid >
         </>
     )
 }

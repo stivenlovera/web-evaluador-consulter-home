@@ -36,7 +36,7 @@ const EvaluacionRespKuden = () => {
         let initialStateResultado: IResultadoTest = {
             fecha_inicio: moment().format('YYYY-MM-DD HH:mm:ss'),
             respuestaPreguntas: [],
-            resultado_test_id: 0,
+            resultado_test_id: test.resultado_test_id,
             test_id: test.test_id
         }
 
@@ -45,7 +45,7 @@ const EvaluacionRespKuden = () => {
                 fecha_inicio: moment().format('YYYY-MM-DD HH:mm:ss'),
                 pregunta_id: pregunta.pregunta_id,
                 resultado_pregunta_id: 0,
-                resultado_test_id: 0,
+                resultado_test_id: test.resultado_test_id,
                 resultadoRespuestas: [],
                 tiempo_duracion: 0
             }

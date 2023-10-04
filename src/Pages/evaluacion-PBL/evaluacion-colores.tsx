@@ -1,4 +1,4 @@
-import { Backdrop, Box, Button, Card, CardContent, CardMedia, CircularProgress, Divider, Grid, Typography } from '@mui/material'
+import { Backdrop, Box, Button, Card, CardContent, CardMedia, CircularProgress, Divider, FormControlLabel, Grid, Radio, TextField, Typography } from '@mui/material'
 import React, { useEffect, useRef, useState } from 'react'
 import { useParams } from "react-router-dom";
 import { ITest, initialStateTest } from '../../Services/Interface/ITest';
@@ -13,6 +13,9 @@ import { IResultadoRespuesta } from '../../Services/Interface/resultadoRespuesta
 import moment from 'moment';
 import UseTest from '../hooks/useTest';
 import { useNavigate } from 'react-router-dom';
+import ModalFinalizar from '../../Components/ModalFinalizar/ModalFinalizar';
+import Timer from '../../Components/Timer/Timer';
+import { ItemRenderProps, SortableItemProps, SortableList } from '@thaddeusjiang/react-sortable-list';
 
 export const initialStateResultado: IResultadoTest = {
     fecha_inicio: '',
@@ -20,13 +23,15 @@ export const initialStateResultado: IResultadoTest = {
     test_id: 0,
     respuestaPreguntas: []
 }
-const EvaluacionPbl = () => {
-    const navigate = useNavigate()
-    const [loading, setLoading] = useState(true);
-    const { id, testId,evaluacion_id } = useParams();
-    const [test, setTest] = useState<ITest>(initialStateTest);
-    const myRefname = useRef<HTMLInputElement>(null);
+const EvaluacionColores = () => {
+    const [transcurrido, setTranscurrido] = useState<number>(0)
+    const [iniciar, setIniciar] = useState(false);
 
+    const navigate = useNavigate();
+    const [modalFinalizar, setmodalFinalizar] = useState(false)
+    const [loading, setLoading] = useState(true);
+    const { id, testId, evaluacion_id } = useParams();
+    const [test, setTest] = useState<ITest>(initialStateTest);
     const { apiCreate, apiStore } = UseTest();
 
     const procesarData = (test: ITest) => {
@@ -52,8 +57,9 @@ const EvaluacionPbl = () => {
                     respuesta_id: respuesta.respuesta_id,
                     resultado_pregunta_id: 0,
                     resultado_respuesta_id: 0,
-                    valor: respuesta.valor,
-                    imagen:''
+                    valor: '0',
+                    imagen: ''
+
                 }
                 resultadoPregunta.resultadoRespuestas.push(respuestaRespuesta);
             })
@@ -66,22 +72,34 @@ const EvaluacionPbl = () => {
         setLoading(true);
         const { data, status } = await apiCreate(parseInt(testId!), parseInt(id!), parseInt(evaluacion_id!));
         if (status) {
+            setTranscurrido(data!.tiempoTranscurrido);
+            setIniciar(data!.activarTiempo);
+            /* restart(new Date(formatted), true) */
             if (data?.completado == 'si') {
                 enqueueSnackbar('Test ya fue registrado', { variant: 'error' })
-                //navigate('/home')
+                navigate('/home')
             }
             setTest(data!);
             procesarData(data!);
         } else {
-            //navigate('/home')
+            navigate('/home')
         }
         setLoading(false);
     }
+
+    const [items, setItems] = useState<SortableItemProps[]>([
+        { id: '0', name: 'Item 1' },
+        { id: '1', name: 'Item 1' },
+        { id: '2', name: 'Item 1' },
+        { id: '3', name: 'Item 1' },
+        { id: '4', name: 'Item 1' },
+        { id: '5', name: 'Item 1' },
+        { id: '6', name: 'Item 1' },
+        { id: '7', name: 'Item 1' }
+    ]);
+
     useEffect(() => {
         Index();
-
-        return () => {
-        }
     }, [])
 
     const validationSchema = Yup.object().shape({
@@ -112,12 +130,12 @@ const EvaluacionPbl = () => {
         validationSchema,
         onSubmit: async (values) => {
             console.log('enviar', values);
-            await apiStore(values, parseInt(testId!), parseInt(id!));
-            navigate('/home')
+            await handlerFinalizar()
         }
     });
     const {
         values,
+        isValid,
         errors,
         handleChange,
         handleSubmit,
@@ -134,6 +152,31 @@ const EvaluacionPbl = () => {
         setFieldValue(`respuestaPreguntas[${indexRespuesta}].resultadoRespuestas[${indexRespuesta}].descripcion`, converImagen);
         console.log(values.respuestaPreguntas[indexPregunta].resultadoRespuestas[indexRespuesta].descripcion)
     }
+    const seleccionUnica = (indexPregunta: number, indexRespuesta: number, descripcion: string) => {
+        values.respuestaPreguntas[indexPregunta].resultadoRespuestas.map((respuesta: IResultadoRespuesta) => {
+            respuesta.valor = '0';
+        });
+
+        setValues(values);
+        setFieldValue(`respuestaPreguntas[${indexPregunta}].resultadoRespuestas[${indexRespuesta}].valor`, '1');
+        setFieldValue(`respuestaPreguntas[${indexPregunta}].resultadoRespuestas[${indexRespuesta}].descripcion`, descripcion);
+    }
+
+    const handlerFinalizar = async () => {
+        if (isValid) {
+            console.log(values)
+            /* setLoading(true)
+            const { data, status } = await apiStore(values, parseInt(testId!), parseInt(id!));
+            if (status) {
+                setLoading(false)
+                setmodalFinalizar(false)
+                navigate('/home')
+            } */
+        }
+        else {
+
+        }
+    }
     return (
         <>
             <Backdrop
@@ -143,6 +186,19 @@ const EvaluacionPbl = () => {
                 <CircularProgress color="inherit" />
             </Backdrop>
             <Grid container spacing={2}>
+                <Grid item xs={12} md={12}>
+                    <Card variant="outlined">
+                        <React.Fragment>
+                            <CardContent>
+                                <Timer
+                                    expiryTimestamp={moment().add(transcurrido, 'second').toDate()}
+                                    iniciar={iniciar}
+                                    onExpire={() => { handlerFinalizar() }}
+                                ></Timer>
+                            </CardContent>
+                        </React.Fragment>
+                    </Card>
+                </Grid>
                 <Grid item xs={12} md={8}>
                     <Box sx={{ minWidth: 275 }}>
                         <FormikProvider value={formResultadosTest}>
@@ -165,17 +221,22 @@ const EvaluacionPbl = () => {
                                                                 {
                                                                     resultadoPregunta && resultadoPregunta.length > 0 ? (
                                                                         resultadoPregunta.map((paso: IResultadoPreguntas, i: number) => {
+                                                                            const imagen = `${process.env.REACT_APP_API_PREGUNTA}${test.preguntas[i].imagen}` == ''
+                                                                                ? ImagenNoDisponible
+                                                                                : `${process.env.REACT_APP_API_PREGUNTA}${test.preguntas[i].imagen}`;
+
                                                                             return (
                                                                                 <Grid item xs={12} md={12} key={i}>
                                                                                     <Typography variant='subtitle1' >
                                                                                         {i + 1}.- {test.preguntas[i].pregunta_nombre}
                                                                                     </Typography>
+                                                                                    <br />
                                                                                     {
                                                                                         test.preguntas[i].imagen != '' ? (
                                                                                             <CardMedia
-                                                                                                style={{ maxWidth: '30%', margin: 'auto' }}
+                                                                                                style={{ maxWidth: '80%', margin: 'auto' }}
                                                                                                 component="img"
-                                                                                                image={test.preguntas[i].imagen == '' ? ImagenNoDisponible : test.preguntas[i].imagen}
+                                                                                                image={imagen}
                                                                                                 alt="Paella dish"
                                                                                             />
                                                                                         )
@@ -183,70 +244,62 @@ const EvaluacionPbl = () => {
                                                                                     }
                                                                                     {
                                                                                         <Grid container spacing={2}>
+                                                                                            <Grid item xs={12} md={12} >
+
+                                                                                            </Grid>
                                                                                             <FieldArray
                                                                                                 name="resultadoRespuestas"
                                                                                                 render={arrayresultadoRespuestas => {
-                                                                                                    const resultadoPregunta = values.respuestaPreguntas[i].resultadoRespuestas;
+                                                                                                    const resultadoResultado = values.respuestaPreguntas[i].resultadoRespuestas;
                                                                                                     return (
-                                                                                                        <>
-                                                                                                            {resultadoPregunta && resultadoPregunta.length > 0 ? (
-                                                                                                                resultadoPregunta.map((paso: IResultadoRespuesta, index: number) => {
+                                                                                                        <Grid container spacing={0} key={i}>
+                                                                                                            <SortableList
+                                                                                                                horizontal={true}
+                                                                                                                items={items}
+                                                                                                                setItems={(data) => {
+                                                                                                                    setItems(data);
+                                                                                                                    var ordenamiento: IResultadoRespuesta[] = [];
+                                                                                                                    items.map((select, i) => {
+                                                                                                                        ordenamiento.push({
+                                                                                                                            descripcion: select!.id,
+                                                                                                                            imagen: '',
+                                                                                                                            respuesta_id: 0,
+                                                                                                                            resultado_pregunta_id: 0,
+                                                                                                                            resultado_respuesta_id: 0,
+                                                                                                                            valor: ''
+                                                                                                                        });
+                                                                                                                    })
+                                                                                                                    values.respuestaPreguntas[i].resultadoRespuestas = ordenamiento;
+                                                                                                                    setValues(values);
+
+                                                                                                                }}
+                                                                                                                itemRender={({ item }: ItemRenderProps) => {
+                                                                                                                    const imagenRespuesta = `${process.env.REACT_APP_API_RESPUESTA}${test.preguntas[i].respuestas[parseInt(item.id)].imagen}` == ''
+                                                                                                                        ? ImagenNoDisponible
+                                                                                                                        : `${process.env.REACT_APP_API_RESPUESTA}${test.preguntas[i].respuestas[parseInt(item.id)].imagen}`;
+
                                                                                                                     return (
-                                                                                                                        <Grid item xs={12} md={12} key={index} >
-                                                                                                                            <div >
-                                                                                                                                <label style={{ display: 'flex' }} htmlFor={`image-resultado-${i}-${index}`}>
-                                                                                                                                    <input
-                                                                                                                                        ref={myRefname}
-                                                                                                                                        type="file"
-                                                                                                                                        accept="image/*"
-                                                                                                                                        id={`image-resultado-${i}-${index}`}
-                                                                                                                                        name={`resultadoRespuestas[${index}].imagen`}
-                                                                                                                                        onChange={(e) => {
-                                                                                                                                            onUploadImagen(e, i, index)
-                                                                                                                                        }}
-                                                                                                                                        hidden
-                                                                                                                                    />
+                                                                                                                        <Grid item xl={1} lg={1} md={1} sm={1} xs={1} sx={{background:'black'}}>
+                                                                                                                           
                                                                                                                                     <CardMedia
-                                                                                                                                        style={{
-                                                                                                                                            maxWidth: '50%',
-                                                                                                                                            margin: 'auto'
-                                                                                                                                        }}
-                                                                                                                                        sx={{
-                                                                                                                                            backgroundColor: 'white',
-                                                                                                                                            '&:hover': {
-                                                                                                                                                backgroundColor: '#94EFFF',
-                                                                                                                                                opacity: [0.9, 0.8, 0.7],
-                                                                                                                                            },
-                                                                                                                                            cursor: 'pointer'
-                                                                                                                                        }}
+                                                                                                                                        style={{ width: '200%'}}
                                                                                                                                         component="img"
-                                                                                                                                        image={values.respuestaPreguntas[i].resultadoRespuestas[index].descripcion == '' ? ImagenNoDisponible : values.respuestaPreguntas[i].resultadoRespuestas[index].descripcion}
-                                                                                                                                        alt="Imagen"
+                                                                                                                                        image={`${imagenRespuesta}`}
+                                                                                                                                        alt=""
+
                                                                                                                                     />
-                                                                                                                                </label>
-                                                                                                                            </div>
-                                                                                                                            <div style={{ textAlign: 'center' }}>
-                                                                                                                                <Button
-                                                                                                                                    size='small'
-                                                                                                                                    variant="contained"
-                                                                                                                                    sx={{ textTransform: 'none', mt: 1 }}
-                                                                                                                                    onClick={(e) => {
-                                                                                                                                        myRefname.current?.click();
-                                                                                                                                    }}
-                                                                                                                                >
-                                                                                                                                    {test.preguntas[i].respuestas[index].descripcion}
-                                                                                                                                </Button>
-                                                                                                                            </div>
-                                                                                                                        </Grid>)
-                                                                                                                })) : null}
-                                                                                                        </>
-                                                                                                    )
+                                                                                                                                
+                                                                                                                        </Grid >
+                                                                                                                    )
+                                                                                                                }}
+                                                                                                            />
+                                                                                                        </Grid>)
                                                                                                 }}
                                                                                             />
 
                                                                                         </Grid>
                                                                                     }
-                                                                                </Grid>
+                                                                                </Grid >
                                                                             )
                                                                         })
                                                                     ) : null
@@ -259,11 +312,13 @@ const EvaluacionPbl = () => {
                                             <Divider sx={{ m: 1 }}></Divider>
                                             <div style={{ textAlign: 'center' }}>
                                                 <Button
-                                                    type='submit'
                                                     color='success'
                                                     size='small'
                                                     variant="contained"
                                                     sx={{ textTransform: 'none', mt: 1 }}
+                                                    onClick={() => {
+                                                        setmodalFinalizar(true)
+                                                    }}
                                                 >
                                                     Finalizar Prueba
                                                 </Button>
@@ -308,9 +363,21 @@ const EvaluacionPbl = () => {
                         </Card>
                     </Box>
                 </Grid>
-            </Grid>
+                <ModalFinalizar
+                    message='Esta seguro de finalizar este Test?'
+                    onClose={(estado) => {
+                        if (estado) {
+                            handlerFinalizar()
+                        } else {
+                            setmodalFinalizar(false)
+                        }
+                    }}
+                    openModal={modalFinalizar}
+                />
+            </Grid >
+
         </>
     )
 }
 
-export default EvaluacionPbl
+export default EvaluacionColores
