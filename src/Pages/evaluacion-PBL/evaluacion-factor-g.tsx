@@ -1,4 +1,4 @@
-import { Backdrop, Box, Button, Card, CardContent, CardMedia, CircularProgress, Divider, FormControlLabel, Grid, Radio, TextField, Typography } from '@mui/material'
+import { Backdrop, Box, Button, Card, CardActionArea, CardContent, CardMedia, CircularProgress, Divider, FormControlLabel, Grid, Radio, TextField, Typography } from '@mui/material'
 import React, { useEffect, useRef, useState } from 'react'
 import { useParams } from "react-router-dom";
 import { ITest, initialStateTest } from '../../Services/Interface/ITest';
@@ -37,7 +37,7 @@ const EvaluacionFactorG = () => {
         let initialStateResultado: IResultadoTest = {
             fecha_inicio: moment().format('YYYY-MM-DD HH:mm:ss'),
             respuestaPreguntas: [],
-            resultado_test_id: 0,
+            resultado_test_id: test.resultado_test_id,
             test_id: test.test_id
         }
 
@@ -71,14 +71,7 @@ const EvaluacionFactorG = () => {
         setLoading(true);
         const { data, status } = await apiCreate(parseInt(testId!), parseInt(id!), parseInt(evaluacion_id!));
         if (status) {
-            const momentInicio = moment(data!.fecha_inicio)
-            const momentSistema = moment(data!.fecha_sistema)
-            const diferencia = momentInicio.diff(momentInicio, "second");
-            const formatted = moment.utc(diferencia * 1000).format('HH:mm:ss');
-            setTranscurrido(momentSistema.diff(momentInicio, "second"));
-
-            console.log('seg trancurridos', diferencia)
-            console.log('TIEMPO DE DIFERENCIA ', formatted)
+            setTranscurrido(data!.seg_disponibles);
             setIniciar(true)
             /* restart(new Date(formatted), true) */
             if (data?.completado == 'si') {
@@ -87,6 +80,7 @@ const EvaluacionFactorG = () => {
             }
             setTest(data!);
             procesarData(data!);
+            
         } else {
             navigate('/home')
         }
@@ -124,9 +118,7 @@ const EvaluacionFactorG = () => {
         initialValues: initialStateResultado,
         validationSchema,
         onSubmit: async (values) => {
-            console.log('enviar', values);
-            await apiStore(values, parseInt(testId!), parseInt(id!));
-            navigate('/home')
+            await onStore()
         }
     });
     const {
@@ -140,6 +132,13 @@ const EvaluacionFactorG = () => {
         setValues,
         resetForm,
     } = formResultadosTest;
+
+    const onStore = async () => {
+        const { data, status } = await apiStore(values, parseInt(testId!), parseInt(id!));
+        if (status) {
+            navigate('/home')
+        }
+    }
 
     const onUploadImagen = async (e: React.ChangeEvent<HTMLInputElement>, indexPregunta: number, indexRespuesta: number) => {
         const converImagen = await readUploadedFileAsText(e);
@@ -181,7 +180,7 @@ const EvaluacionFactorG = () => {
                                 <Timer
                                     expiryTimestamp={moment().add(transcurrido, 'second').toDate()}
                                     iniciar={iniciar}
-                                    onExpire={() => { navigate('/home') }}
+                                    onExpire={onStore}
                                 ></Timer>
                             </CardContent>
                         </React.Fragment>
@@ -249,24 +248,43 @@ const EvaluacionFactorG = () => {
                                                                                                                         ? ImagenNoDisponible
                                                                                                                         : `${process.env.REACT_APP_API_RESPUESTA}${test.preguntas[i].respuestas[index].imagen}`;
                                                                                                                     return (
-                                                                                                                        <Grid item xs={2} md={2} key={index} style={{ paddingTop: 0 }} >
-                                                                                                                            <div>
-                                                                                                                                <CardMedia
-                                                                                                                                    style={{ maxWidth: '80%', margin: 'auto' }}
-                                                                                                                                    component="img"
-                                                                                                                                    image={`${imagenRespuesta}`}
-                                                                                                                                    alt=""
-                                                                                                                                />
-                                                                                                                                <FormControlLabel value="" control={
-                                                                                                                                    <Radio
-                                                                                                                                        checked={values.respuestaPreguntas[i].resultadoRespuestas[index].valor === '1'}
-                                                                                                                                        onChange={() => { seleccionUnica(`respuestaPreguntas[${i}].resultadoRespuestas[${index}].valor`, i, test.preguntas[i].respuestas[index].valor) }}
-                                                                                                                                        value={values.respuestaPreguntas[i].resultadoRespuestas[index].valor}
-                                                                                                                                        name={`respuestaPreguntas[${i}].resultadoRespuestas[${index}].valor`}
-                                                                                                                                        inputProps={{ 'aria-label': '1' }}
+                                                                                                                        <Grid item xs={4} md={2} sm={2} xl={2} key={index} style={{ paddingTop: 0 }} >
+                                                                                                                            <Card
+                                                                                                                                sx={{ maxWidth: 345, background: (values.respuestaPreguntas[i].resultadoRespuestas[index].valor) == '1' ? '#C5C5C5' : '#FFFFFF' }}
+                                                                                                                                onClick={() => { seleccionUnica(`respuestaPreguntas[${i}].resultadoRespuestas[${index}].valor`, i, test.preguntas[i].respuestas[index].valor) }}
+                                                                                                                            >
+                                                                                                                                <CardActionArea>
+                                                                                                                                    <CardMedia
+                                                                                                                                        style={{ maxWidth: '80%', maxHeight: '80%', margin: 'auto', paddingTop:8, paddingBottom:8 }}
+                                                                                                                                        component="img"
+                                                                                                                                        image={`${imagenRespuesta}`}
+                                                                                                                                        alt=""
                                                                                                                                     />
-                                                                                                                                } label={test.preguntas[i].respuestas[index].descripcion} />
-                                                                                                                            </div>
+                                                                                                                                    <CardContent sx={{ p: 0 }} >
+                                                                                                                                        <Grid
+                                                                                                                                            container
+                                                                                                                                            spacing={0}
+                                                                                                                                            direction="column"
+                                                                                                                                            alignItems="center"
+                                                                                                                                            justifyContent="center"
+                                                                                                                                        >
+                                                                                                                                            <Grid item xs={3}>
+                                                                                                                                                <FormControlLabel value="" control={
+                                                                                                                                                    <Radio
+                                                                                                                                                        size='small'
+                                                                                                                                                        checked={values.respuestaPreguntas[i].resultadoRespuestas[index].valor === '1'}
+                                                                                                                                                        onChange={() => { seleccionUnica(`respuestaPreguntas[${i}].resultadoRespuestas[${index}].valor`, i, test.preguntas[i].respuestas[index].valor) }}
+                                                                                                                                                        value={values.respuestaPreguntas[i].resultadoRespuestas[index].valor}
+                                                                                                                                                        name={`respuestaPreguntas[${i}].resultadoRespuestas[${index}].valor`}
+                                                                                                                                                        inputProps={{ 'aria-label': '1' }}
+                                                                                                                                                    />
+                                                                                                                                                } label={test.preguntas[i].respuestas[index].descripcion} />
+                                                                                                                                            </Grid>
+                                                                                                                                        </Grid>
+
+                                                                                                                                    </CardContent>
+                                                                                                                                </CardActionArea>
+                                                                                                                            </Card>
                                                                                                                         </Grid>)
                                                                                                                 })) : null}
                                                                                                         </>

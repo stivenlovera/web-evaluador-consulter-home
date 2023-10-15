@@ -35,7 +35,7 @@ const EvaluacionRespUnica = () => {
         let initialStateResultado: IResultadoTest = {
             fecha_inicio: moment().format('YYYY-MM-DD HH:mm:ss'),
             respuestaPreguntas: [],
-            resultado_test_id: 0,
+            resultado_test_id: test.resultado_test_id,
             test_id: test.test_id
         }
 

@@ -7,12 +7,12 @@ export interface ITest {
     tipo_preguntas_id: number;
     descripcion_test: string;
     fecha_inicio: string;
-    fecha_sistema: string;
+    seg_disponibles: number;
     tiempo_total: number;
     preguntas: IPregunta[];
     procedimiento: ''
     pasos: IProcedimiento[]
-
+    resultado_test_id:number;
 }
 export interface IProcedimiento {
     procedimiento_id: number;
@@ -30,5 +30,6 @@ export const initialStateTest: ITest = {
     preguntas: [],
     procedimiento: '',
     fecha_inicio: '',
-    fecha_sistema: ''
+    seg_disponibles: 0,
+    resultado_test_id:0
 }

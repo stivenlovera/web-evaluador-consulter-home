@@ -23,7 +23,7 @@ export const initialStateResultado: IResultadoTest = {
 const EvaluacionPbl = () => {
     const navigate = useNavigate()
     const [loading, setLoading] = useState(true);
-    const { id, testId,evaluacion_id } = useParams();
+    const { id, testId, evaluacion_id } = useParams();
     const [test, setTest] = useState<ITest>(initialStateTest);
     const myRefname = useRef<HTMLInputElement>(null);
 
@@ -33,7 +33,7 @@ const EvaluacionPbl = () => {
         let initialStateResultado: IResultadoTest = {
             fecha_inicio: moment().format('YYYY-MM-DD HH:mm:ss'),
             respuestaPreguntas: [],
-            resultado_test_id: 0,
+            resultado_test_id: test.resultado_test_id,
             test_id: test.test_id
         }
 
@@ -53,7 +53,7 @@ const EvaluacionPbl = () => {
                     resultado_pregunta_id: 0,
                     resultado_respuesta_id: 0,
                     valor: respuesta.valor,
-                    imagen:''
+                    imagen: ''
                 }
                 resultadoPregunta.resultadoRespuestas.push(respuestaRespuesta);
             })

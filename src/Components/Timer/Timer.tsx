@@ -20,12 +20,13 @@ const Timer = ({ expiryTimestamp, onExpire, iniciar }: TimerProps) => {
     } = useTimer({ expiryTimestamp: expiryTimestamp, onExpire: onExpire });
 
     useEffect(() => {
+        console.log(expiryTimestamp)
         if (iniciar) {
             restart(expiryTimestamp)
         } else {
             pause()
         }
-    }, [expiryTimestamp])
+    }, [iniciar])
 
     return (
         <div>

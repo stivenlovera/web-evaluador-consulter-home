@@ -10,6 +10,7 @@ import { UseHome } from './hooks/useHome';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { useNavigate } from 'react-router-dom';
 import ModalIniciar from '../../Components/ModalIniciar/modal-iniciar';
+import moment from 'moment';
 
 interface TipoEvaluacion {
   id: number;
@@ -111,17 +112,19 @@ const Home = () => {
                             {test.nombreTest}
                           </Typography>
                           {
-                            test.tiempo_total == 0 ? (null) : (<Chip label={`Duracion ${test.tiempo_total} min.`} color="primary" style={{ margin: 3 }} />)
+                            test.tiempo_total == 0 ? (null) : (<Chip label={`Duracion ${moment.utc(test.tiempo_total * 1000).format('HH:mm:ss')} min.`} color="primary" style={{ margin: 3 }} />)
                           }
-                          <Chip
-                            label={'Prueba demo'}
-                            color="default"
-                            style={{ margin: 3 }}
-                            icon={<PlayArrowIcon />}
-                            onClick={() => {
-                              //navigate(resolverUrl(test.tipo_preguntas_id, test.test_id, informacion.id))
-                              console.log(resolverUrl(test.tipo_preguntas_id, test.test_id, informacion.id,informacion.evaluacion_id))
-                            }} />
+                          {
+                            test.tipo_preguntas_id == 11 ? (<Chip
+                              label={'Prueba demo'}
+                              color="default"
+                              style={{ margin: 3 }}
+                              icon={<PlayArrowIcon />}
+                              onClick={() => {
+                                //navigate(resolverUrl(test.tipo_preguntas_id, test.test_id, informacion.id))
+                                console.log(resolverUrl(test.tipo_preguntas_id, test.test_id, informacion.id, informacion.evaluacion_id))
+                              }} />) : null
+                          }
                           <Chip
                             label={'INICIAR'}
                             color="success"
@@ -163,7 +166,7 @@ const Home = () => {
                             {test.nombreTest}
                           </Typography>
                           {
-                            test.tiempo_total == 0 ? (null) : (<Chip label={`Duracion ${test.tiempo_total} min.`} color="primary" style={{ margin: 3 }} />)
+                            test.tiempo_total == 0 ? (null) : (<Chip label={`Duracion ${moment.utc(test.tiempo_total * 1000).format('HH:mm:ss')} min.`} color="primary" style={{ margin: 3 }} />)
                           }
                         </Box>
                       </div>
