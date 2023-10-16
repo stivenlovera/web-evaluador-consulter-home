@@ -53,6 +53,9 @@ const Home = () => {
       case 4:
         route = `/evaluacion-PBL/${test_id}/${id}/${evaluacion_id}`;
         break;
+      case 6:
+        route = `/evaluacion-roshard/${test_id}/${id}/${evaluacion_id}`;
+        break
       case 7:
         route = `/evaluacion-kuden/${test_id}/${id}/${evaluacion_id}`;
         break;

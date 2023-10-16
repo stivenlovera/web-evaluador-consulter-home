@@ -1,5 +1,5 @@
 import { Backdrop, Box, Button, Card, CardContent, CardMedia, CircularProgress, Divider, FormControlLabel, Grid, Radio, TextField, Typography } from '@mui/material'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { forwardRef, useEffect, useRef, useState } from 'react'
 import { useParams } from "react-router-dom";
 import { ITest, initialStateTest } from '../../Services/Interface/ITest';
 import { enqueueSnackbar } from 'notistack';
@@ -15,7 +15,13 @@ import UseTest from '../hooks/useTest';
 import { useNavigate } from 'react-router-dom';
 import ModalFinalizar from '../../Components/ModalFinalizar/ModalFinalizar';
 import Timer from '../../Components/Timer/Timer';
-import { ItemRenderProps, SortableItemProps, SortableList } from '@thaddeusjiang/react-sortable-list';
+import { ReactSortable } from 'react-sortablejs';
+import { IRespuesta } from '../../Services/Interface/IPregunta';
+import './colores.css'
+interface ItemType {
+    id: number;
+    name: string;
+}
 
 export const initialStateResultado: IResultadoTest = {
     fecha_inicio: '',
@@ -86,17 +92,6 @@ const EvaluacionColores = () => {
         }
         setLoading(false);
     }
-
-    const [items, setItems] = useState<SortableItemProps[]>([
-        { id: '0', name: 'Item 1' },
-        { id: '1', name: 'Item 1' },
-        { id: '2', name: 'Item 1' },
-        { id: '3', name: 'Item 1' },
-        { id: '4', name: 'Item 1' },
-        { id: '5', name: 'Item 1' },
-        { id: '6', name: 'Item 1' },
-        { id: '7', name: 'Item 1' }
-    ]);
 
     useEffect(() => {
         Index();
@@ -177,6 +172,7 @@ const EvaluacionColores = () => {
 
         }
     }
+
     return (
         <>
             <Backdrop
@@ -224,7 +220,6 @@ const EvaluacionColores = () => {
                                                                             const imagen = `${process.env.REACT_APP_API_PREGUNTA}${test.preguntas[i].imagen}` == ''
                                                                                 ? ImagenNoDisponible
                                                                                 : `${process.env.REACT_APP_API_PREGUNTA}${test.preguntas[i].imagen}`;
-
                                                                             return (
                                                                                 <Grid item xs={12} md={12} key={i}>
                                                                                     <Typography variant='subtitle1' >
@@ -243,61 +238,16 @@ const EvaluacionColores = () => {
                                                                                             : null
                                                                                     }
                                                                                     {
-                                                                                        <Grid container spacing={2}>
-                                                                                            <Grid item xs={12} md={12} >
 
-                                                                                            </Grid>
-                                                                                            <FieldArray
-                                                                                                name="resultadoRespuestas"
-                                                                                                render={arrayresultadoRespuestas => {
-                                                                                                    const resultadoResultado = values.respuestaPreguntas[i].resultadoRespuestas;
-                                                                                                    return (
-                                                                                                        <Grid container spacing={0} key={i}>
-                                                                                                            <SortableList
-                                                                                                                horizontal={true}
-                                                                                                                items={items}
-                                                                                                                setItems={(data) => {
-                                                                                                                    setItems(data);
-                                                                                                                    var ordenamiento: IResultadoRespuesta[] = [];
-                                                                                                                    items.map((select, i) => {
-                                                                                                                        ordenamiento.push({
-                                                                                                                            descripcion: select!.id,
-                                                                                                                            imagen: '',
-                                                                                                                            respuesta_id: 0,
-                                                                                                                            resultado_pregunta_id: 0,
-                                                                                                                            resultado_respuesta_id: 0,
-                                                                                                                            valor: ''
-                                                                                                                        });
-                                                                                                                    })
-                                                                                                                    values.respuestaPreguntas[i].resultadoRespuestas = ordenamiento;
-                                                                                                                    setValues(values);
-
-                                                                                                                }}
-                                                                                                                itemRender={({ item }: ItemRenderProps) => {
-                                                                                                                    const imagenRespuesta = `${process.env.REACT_APP_API_RESPUESTA}${test.preguntas[i].respuestas[parseInt(item.id)].imagen}` == ''
-                                                                                                                        ? ImagenNoDisponible
-                                                                                                                        : `${process.env.REACT_APP_API_RESPUESTA}${test.preguntas[i].respuestas[parseInt(item.id)].imagen}`;
-
-                                                                                                                    return (
-                                                                                                                        <Grid item xl={1} lg={1} md={1} sm={1} xs={1} sx={{background:'black'}}>
-                                                                                                                           
-                                                                                                                                    <CardMedia
-                                                                                                                                        style={{ width: '200%'}}
-                                                                                                                                        component="img"
-                                                                                                                                        image={`${imagenRespuesta}`}
-                                                                                                                                        alt=""
-
-                                                                                                                                    />
-                                                                                                                                
-                                                                                                                        </Grid >
-                                                                                                                    )
-                                                                                                                }}
-                                                                                                            />
-                                                                                                        </Grid>)
-                                                                                                }}
-                                                                                            />
-
-                                                                                        </Grid>
+                                                                                        <FieldArray
+                                                                                            name="resultadoRespuestas"
+                                                                                            render={({ handlePush }) => {
+                                                                                                const resultadoRespuestas = test.preguntas[i].respuestas;
+                                                                                                return (
+                                                                                                    <SelecionColores data={resultadoRespuestas} />
+                                                                                                )
+                                                                                            }}
+                                                                                        />
                                                                                     }
                                                                                 </Grid >
                                                                             )
@@ -381,3 +331,59 @@ const EvaluacionColores = () => {
 }
 
 export default EvaluacionColores
+
+interface SelecionColoresProps {
+    data: IRespuesta[]
+}
+export const SelecionColores = ({ data }: SelecionColoresProps) => {
+    const [respuestas, setRespuestas] = useState<ItemType[]>([])
+    const autoMapeo = () => {
+        console.log(data)
+        let valores = data.map(((item) => {
+            return {
+                id: item.respuesta_id,
+                name: item.imagen,
+            }
+        }))
+        setRespuestas(valores);
+        console.log(valores)
+    }
+    const inizialize = () => {
+        autoMapeo()
+    }
+
+    useEffect(() => {
+        inizialize()
+    }, [])
+    const CustomComponent = forwardRef<HTMLDivElement, any>((props, ref) => {
+        return <Grid container spacing={2} {...props} ref={ref}>{props.children}</Grid>;
+    });
+    return (
+        <ReactSortable
+            /* tag={CustomComponent} */
+            className='center MuiGrid-root MuiGrid-container css-mhc70k-MuiGrid-root '
+            list={respuestas}
+            /* onMove={(e)=>{console.log(e)}} */
+            /* direction={'vertical'} */
+            animation={200}
+            delay={2}
+            setList={setRespuestas}
+        >
+            {respuestas.map((item, k) => {
+                const imagenRespuesta = `${process.env.REACT_APP_API_RESPUESTA}${item.name}` == ''
+                    ? ImagenNoDisponible
+                    : `${process.env.REACT_APP_API_RESPUESTA}${item.name}`;
+                return (
+                    <Grid item xl={1} lg={2} md={2} sm={2} xs={3} key={item.id} sx={{ cursor: 'pointer', margin: 0, marginBottom: 1, padding: 0 }}>
+                        <CardMedia
+                            style={{ width: '100%' }}
+                            component="img"
+                            image={`${imagenRespuesta}`}
+                            alt=""
+                        />
+                    </Grid>
+                )
+            })}
+        </ReactSortable>
+    )
+}
