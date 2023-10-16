@@ -1,5 +1,5 @@
-import { Backdrop, Box, Button, Card, CardContent, CardMedia, CircularProgress, Divider, Grid, Paper, TextField, Typography } from '@mui/material'
-import React, { useEffect, useRef, useState } from 'react'
+import { Backdrop, Box, Button, Card, CardContent, CardMedia, CircularProgress, Divider, FormControlLabel, Grid, Radio, TextField, Typography } from '@mui/material'
+import React, { forwardRef, useEffect, useRef, useState } from 'react'
 import { useParams } from "react-router-dom";
 import { ITest, initialStateTest } from '../../Services/Interface/ITest';
 import { enqueueSnackbar } from 'notistack';
@@ -13,6 +13,15 @@ import { IResultadoRespuesta } from '../../Services/Interface/resultadoRespuesta
 import moment from 'moment';
 import UseTest from '../hooks/useTest';
 import { useNavigate } from 'react-router-dom';
+import ModalFinalizar from '../../Components/ModalFinalizar/ModalFinalizar';
+import Timer from '../../Components/Timer/Timer';
+import { ReactSortable } from 'react-sortablejs';
+import { IRespuesta } from '../../Services/Interface/IPregunta';
+import './colores.css'
+interface ItemType {
+    id: number;
+    name: string;
+}
 
 export const initialStateResultado: IResultadoTest = {
     fecha_inicio: '',
@@ -20,13 +29,15 @@ export const initialStateResultado: IResultadoTest = {
     test_id: 0,
     respuestaPreguntas: []
 }
-export const EvaluacionRoshard = () => {
-    const navigate = useNavigate()
+const EvaluacionHistorietas = () => {
+    const [transcurrido, setTranscurrido] = useState<number>(0)
+    const [iniciar, setIniciar] = useState(false);
+
+    const navigate = useNavigate();
+    const [modalFinalizar, setmodalFinalizar] = useState(false)
     const [loading, setLoading] = useState(true);
     const { id, testId, evaluacion_id } = useParams();
     const [test, setTest] = useState<ITest>(initialStateTest);
-    const myRefname = useRef<HTMLInputElement>(null);
-
     const { apiCreate, apiStore } = UseTest();
 
     const procesarData = (test: ITest) => {
@@ -52,8 +63,9 @@ export const EvaluacionRoshard = () => {
                     respuesta_id: respuesta.respuesta_id,
                     resultado_pregunta_id: 0,
                     resultado_respuesta_id: 0,
-                    valor: respuesta.valor,
+                    valor: '0',
                     imagen: ''
+
                 }
                 resultadoPregunta.resultadoRespuestas.push(respuestaRespuesta);
             })
@@ -66,6 +78,9 @@ export const EvaluacionRoshard = () => {
         setLoading(true);
         const { data, status } = await apiCreate(parseInt(testId!), parseInt(id!), parseInt(evaluacion_id!));
         if (status) {
+            setTranscurrido(data!.tiempoTranscurrido);
+            setIniciar(data!.activarTiempo);
+            /* restart(new Date(formatted), true) */
             if (data?.completado == 'si') {
                 enqueueSnackbar('Test ya fue registrado', { variant: 'error' })
                 navigate('/home')
@@ -77,11 +92,9 @@ export const EvaluacionRoshard = () => {
         }
         setLoading(false);
     }
+
     useEffect(() => {
         Index();
-
-        return () => {
-        }
     }, [])
 
     const validationSchema = Yup.object().shape({
@@ -112,12 +125,12 @@ export const EvaluacionRoshard = () => {
         validationSchema,
         onSubmit: async (values) => {
             console.log('enviar', values);
-            await apiStore(values, parseInt(testId!), parseInt(id!));
-            navigate('/home')
+            await handlerFinalizar()
         }
     });
     const {
         values,
+        isValid,
         errors,
         handleChange,
         handleSubmit,
@@ -134,6 +147,32 @@ export const EvaluacionRoshard = () => {
         setFieldValue(`respuestaPreguntas[${indexRespuesta}].resultadoRespuestas[${indexRespuesta}].descripcion`, converImagen);
         console.log(values.respuestaPreguntas[indexPregunta].resultadoRespuestas[indexRespuesta].descripcion)
     }
+    const seleccionUnica = (indexPregunta: number, indexRespuesta: number, descripcion: string) => {
+        values.respuestaPreguntas[indexPregunta].resultadoRespuestas.map((respuesta: IResultadoRespuesta) => {
+            respuesta.valor = '0';
+        });
+
+        setValues(values);
+        setFieldValue(`respuestaPreguntas[${indexPregunta}].resultadoRespuestas[${indexRespuesta}].valor`, '1');
+        setFieldValue(`respuestaPreguntas[${indexPregunta}].resultadoRespuestas[${indexRespuesta}].descripcion`, descripcion);
+    }
+
+    const handlerFinalizar = async () => {
+        if (isValid) {
+            console.log(values)
+            /* setLoading(true)
+            const { data, status } = await apiStore(values, parseInt(testId!), parseInt(id!));
+            if (status) {
+                setLoading(false)
+                setmodalFinalizar(false)
+                navigate('/home')
+            } */
+        }
+        else {
+
+        }
+    }
+
     return (
         <>
             <Backdrop
@@ -143,6 +182,19 @@ export const EvaluacionRoshard = () => {
                 <CircularProgress color="inherit" />
             </Backdrop>
             <Grid container spacing={2}>
+                <Grid item xs={12} md={12}>
+                    <Card variant="outlined">
+                        <React.Fragment>
+                            <CardContent>
+                                <Timer
+                                    expiryTimestamp={moment().add(transcurrido, 'second').toDate()}
+                                    iniciar={iniciar}
+                                    onExpire={() => { handlerFinalizar() }}
+                                ></Timer>
+                            </CardContent>
+                        </React.Fragment>
+                    </Card>
+                </Grid>
                 <Grid item xs={12} md={8}>
                     <Box sx={{ minWidth: 275 }}>
                         <FormikProvider value={formResultadosTest}>
@@ -173,58 +225,29 @@ export const EvaluacionRoshard = () => {
                                                                                     <Typography variant='subtitle1' >
                                                                                         {i + 1}.- {test.preguntas[i].pregunta_nombre}
                                                                                     </Typography>
+                                                                                    <br />
                                                                                     {
                                                                                         test.preguntas[i].imagen != '' ? (
-                                                                                            <Grid container spacing={0} key={i}>
-                                                                                                <Grid item xl={6} lg={6} md={6} sm={12} xs={12}>
-                                                                                                    <CardMedia
-                                                                                                        style={{ maxWidth: '80%', margin: 'auto' }}
-                                                                                                        component="img"
-                                                                                                        image={`${imagen}`}
-                                                                                                        alt=""
-                                                                                                    />
-                                                                                                </Grid>
-                                                                                                <Marcacion onPosicion={(valor) => { setFieldValue(`respuestaPreguntas[${id}].resultadoRespuestas[${0}].descripcion`, valor) }} />
-                                                                                            </Grid>
+                                                                                            <CardMedia
+                                                                                                style={{ maxWidth: '80%', margin: 'auto' }}
+                                                                                                component="img"
+                                                                                                image={imagen}
+                                                                                                alt="Paella dish"
+                                                                                            />
                                                                                         )
                                                                                             : null
                                                                                     }
                                                                                     {
-                                                                                        <Grid container spacing={2}>
-                                                                                            <FieldArray
-                                                                                                name="resultadoRespuestas"
-                                                                                                render={arrayresultadoRespuestas => {
-                                                                                                    const resultadoResultado = values.respuestaPreguntas[i].resultadoRespuestas;
-                                                                                                    return (
-                                                                                                        <>
-                                                                                                            {resultadoResultado && resultadoResultado.length > 0 ? (
-                                                                                                                resultadoResultado.map((respuesta: IResultadoRespuesta, index: number) => {
-                                                                                                                    index+1;
-                                                                                                                    const imagen = `${process.env.REACT_APP_API_RESPUESTA}${values.respuestaPreguntas[i].resultadoRespuestas[index].descripcion}` == ''
-                                                                                                                        ? ImagenNoDisponible
-                                                                                                                        : `${process.env.REACT_APP_API_RESPUESTA}${values.respuestaPreguntas[i].resultadoRespuestas[index].descripcion}`;
-                                                                                                                    return (
-                                                                                                                        <Grid item xs={12} md={12} key={index} >
-                                                                                                                            <div>
-                                                                                                                                <TextField
-                                                                                                                                    fullWidth
-                                                                                                                                    label={test.preguntas[i].respuestas[index].descripcion}
-                                                                                                                                    variant="filled"
-                                                                                                                                    size='small'
-                                                                                                                                    name={`respuestaPreguntas[${i}].resultadoRespuestas[${index}].descripcion`}
-                                                                                                                                    value={values.respuestaPreguntas[i].resultadoRespuestas[index].descripcion}
-                                                                                                                                    onChange={handleChange}
-                                                                                                                                    onBlur={handleBlur}
-                                                                                                                                />
-                                                                                                                            </div>
-                                                                                                                        </Grid>)
-                                                                                                                })) : null}
-                                                                                                        </>
-                                                                                                    )
-                                                                                                }}
-                                                                                            />
 
-                                                                                        </Grid>
+                                                                                        <FieldArray
+                                                                                            name="resultadoRespuestas"
+                                                                                            render={({ handlePush }) => {
+                                                                                                const resultadoRespuestas = test.preguntas[i].respuestas;
+                                                                                                return (
+                                                                                                    <SelecionColores data={resultadoRespuestas} />
+                                                                                                )
+                                                                                            }}
+                                                                                        />
                                                                                     }
                                                                                 </Grid >
                                                                             )
@@ -235,15 +258,17 @@ export const EvaluacionRoshard = () => {
                                                         )
                                                     }}
                                                 />
-                                            </Grid >
+                                            </Grid>
                                             <Divider sx={{ m: 1 }}></Divider>
                                             <div style={{ textAlign: 'center' }}>
                                                 <Button
-                                                    type='submit'
                                                     color='success'
                                                     size='small'
                                                     variant="contained"
                                                     sx={{ textTransform: 'none', mt: 1 }}
+                                                    onClick={() => {
+                                                        setmodalFinalizar(true)
+                                                    }}
                                                 >
                                                     Finalizar Prueba
                                                 </Button>
@@ -288,53 +313,77 @@ export const EvaluacionRoshard = () => {
                         </Card>
                     </Box>
                 </Grid>
+                <ModalFinalizar
+                    message='Esta seguro de finalizar este Test?'
+                    onClose={(estado) => {
+                        if (estado) {
+                            handlerFinalizar()
+                        } else {
+                            setmodalFinalizar(false)
+                        }
+                    }}
+                    openModal={modalFinalizar}
+                />
             </Grid >
+
         </>
     )
 }
-interface MarcacionPros {
-    onPosicion: (posicion: string) => void;
-}
-const Marcacion = ({ onPosicion }: MarcacionPros) => {
-    const [posiciones, setPosiciones] = useState<string>('');
-    const onSelecion = (posicion: number) => {
-        if (posiciones.includes(posicion.toString())) {
-            setPosiciones(`${posiciones}`)
-        } else {
-            posiciones.replace(posicion.toString(), "");
-            setPosiciones(`${posiciones}`)
-        }
-        onPosicion(posiciones);
-    }
-    const colorSeleccion = (i: number) => {
-        if (posiciones.includes(i.toString())) {
-            return '#E8E8E8'
-        } else {
-            return '#FFFFFF'
-        }
-    }
-    return (
-        <Grid item xl={6} lg={6} md={6} sm={12} xs={12}>
-            <Grid container spacing={0}>
-                {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((posicion, i) => {
-                    return (
-                        <Grid item xl={6} lg={6} md={6} sm={12} xs={4}>
-                            <Paper
-                                sx={{
-                                    height: 100,
-                                    width: 100,
-                                    backgroundColor: colorSeleccion(i)
 
-                                }}
-                                onClick={() => {
-                                    onSelecion(i)
-                                }}
-                            />
-                        </Grid>
-                    )
-                })}
-            </Grid>
-        </Grid>
+export default EvaluacionHistorietas
+
+interface SelecionColoresProps {
+    data: IRespuesta[]
+}
+export const SelecionColores = ({ data }: SelecionColoresProps) => {
+    const [respuestas, setRespuestas] = useState<ItemType[]>([])
+    const autoMapeo = () => {
+        console.log(data)
+        let valores = data.map(((item) => {
+            return {
+                id: item.respuesta_id,
+                name: item.imagen,
+            }
+        }))
+        setRespuestas(valores);
+        console.log(valores)
+    }
+    const inizialize = () => {
+        autoMapeo()
+    }
+
+    useEffect(() => {
+        inizialize()
+    }, [])
+    const CustomComponent = forwardRef<HTMLDivElement, any>((props, ref) => {
+        return <Grid container spacing={2} {...props} ref={ref}>{props.children}</Grid>;
+    });
+    return (
+        <ReactSortable
+            /* tag={CustomComponent} */
+            className='center MuiGrid-root MuiGrid-container css-mhc70k-MuiGrid-root '
+            list={respuestas}
+            /* onMove={(e)=>{console.log(e)}} */
+            /* direction={'vertical'} */
+            animation={200}
+            delay={2}
+            setList={setRespuestas}
+        >
+            {respuestas.map((item, k) => {
+                const imagenRespuesta = `${process.env.REACT_APP_API_RESPUESTA}${item.name}` == ''
+                    ? ImagenNoDisponible
+                    : `${process.env.REACT_APP_API_RESPUESTA}${item.name}`;
+                return (
+                    <Grid item xl={1} lg={2} md={2} sm={2} xs={3} key={item.id} sx={{ cursor: 'pointer', margin: 0, marginBottom: 1, padding: 0 }}>
+                        <CardMedia
+                            style={{ width: '100%' }}
+                            component="img"
+                            image={`${imagenRespuesta}`}
+                            alt=""
+                        />
+                    </Grid>
+                )
+            })}
+        </ReactSortable>
     )
 }
-
