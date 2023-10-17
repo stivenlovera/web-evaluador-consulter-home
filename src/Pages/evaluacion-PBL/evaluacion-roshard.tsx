@@ -20,7 +20,7 @@ export const initialStateResultado: IResultadoTest = {
     test_id: 0,
     respuestaPreguntas: []
 }
-export const EvaluacionRoshard = () => {
+ const EvaluacionRoshard = () => {
     const navigate = useNavigate()
     const [loading, setLoading] = useState(true);
     const { id, testId, evaluacion_id } = useParams();
@@ -184,7 +184,7 @@ export const EvaluacionRoshard = () => {
                                                                                                         alt=""
                                                                                                     />
                                                                                                 </Grid>
-                                                                                                <Marcacion onPosicion={(valor) => { setFieldValue(`respuestaPreguntas[${id}].resultadoRespuestas[${0}].descripcion`, valor) }} />
+                                                                                                <Marcacion onPosicion={(valor) => { /* setFieldValue(`respuestaPreguntas[${id}].resultadoRespuestas[${0}].descripcion`, valor)  */}} />
                                                                                             </Grid>
                                                                                         )
                                                                                             : null
@@ -199,10 +199,8 @@ export const EvaluacionRoshard = () => {
                                                                                                         <>
                                                                                                             {resultadoResultado && resultadoResultado.length > 0 ? (
                                                                                                                 resultadoResultado.map((respuesta: IResultadoRespuesta, index: number) => {
-                                                                                                                    index+1;
-                                                                                                                    const imagen = `${process.env.REACT_APP_API_RESPUESTA}${values.respuestaPreguntas[i].resultadoRespuestas[index].descripcion}` == ''
-                                                                                                                        ? ImagenNoDisponible
-                                                                                                                        : `${process.env.REACT_APP_API_RESPUESTA}${values.respuestaPreguntas[i].resultadoRespuestas[index].descripcion}`;
+                                                                                                                    index=index+1;
+                                                                                                                    console.log(test.preguntas[i].respuestas[index].descripcion)
                                                                                                                     return (
                                                                                                                         <Grid item xs={12} md={12} key={index} >
                                                                                                                             <div>
@@ -292,6 +290,8 @@ export const EvaluacionRoshard = () => {
         </>
     )
 }
+
+export default EvaluacionRoshard;
 interface MarcacionPros {
     onPosicion: (posicion: string) => void;
 }
@@ -318,7 +318,7 @@ const Marcacion = ({ onPosicion }: MarcacionPros) => {
             <Grid container spacing={0}>
                 {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((posicion, i) => {
                     return (
-                        <Grid item xl={6} lg={6} md={6} sm={12} xs={4}>
+                        <Grid item xl={6} lg={6} md={6} sm={12} xs={4} key={i}>
                             <Paper
                                 sx={{
                                     height: 100,
