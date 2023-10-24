@@ -243,8 +243,38 @@ const EvaluacionColores = () => {
                                                                                             name="resultadoRespuestas"
                                                                                             render={({ handlePush }) => {
                                                                                                 const resultadoRespuestas = test.preguntas[i].respuestas;
+                                                                                                let valores = resultadoRespuestas.map(((item) => {
+                                                                                                    return {
+                                                                                                        respuesta_id: item.respuesta_id,
+                                                                                                        id: item.respuesta_id,
+                                                                                                        name: item.imagen,
+                                                                                                        imagen: item.imagen,
+                                                                                                        descripcion: item.descripcion,
+                                                                                                        procesar: item.procesar,
+                                                                                                        valor: item.valor
+                                                                                                    }
+                                                                                                }))
                                                                                                 return (
-                                                                                                    <SelecionColores data={resultadoRespuestas} />
+                                                                                                    <SelecionColores
+                                                                                                        respuestas={valores}
+                                                                                                        setRespuestas={
+                                                                                                            (data) => {
+                                                                                                                const nuevoValor = data.map((data) => {
+                                                                                                                    const res: IRespuesta = {
+                                                                                                                        respuesta_id: data.respuesta_id,
+                                                                                                                        imagen: data.imagen,
+                                                                                                                        descripcion: data.descripcion,
+                                                                                                                        procesar: data.procesar,
+                                                                                                                        valor: data.valor,
+                                                                                                                    }
+                                                                                                                    return res;
+                                                                                                                })
+                                                                                                                test.preguntas[i].respuestas = nuevoValor;
+                                                                                                                setTest(test);
+                                                                                                                setFieldValue(`respuestaPreguntas[${i}].resultadoRespuestas`, nuevoValor)
+                                                                                                            }
+                                                                                                        }
+                                                                                                    />
                                                                                                 )
                                                                                             }}
                                                                                         />
@@ -333,38 +363,17 @@ const EvaluacionColores = () => {
 export default EvaluacionColores
 
 interface SelecionColoresProps {
-    data: IRespuesta[]
+    respuestas: any[]
+    setRespuestas: (respuestas: any[]) => void
 }
-export const SelecionColores = ({ data }: SelecionColoresProps) => {
-    const [respuestas, setRespuestas] = useState<ItemType[]>([])
-    const autoMapeo = () => {
-        console.log(data)
-        let valores = data.map(((item) => {
-            return {
-                id: item.respuesta_id,
-                name: item.imagen,
-            }
-        }))
-        setRespuestas(valores);
-        console.log(valores)
-    }
-    const inizialize = () => {
-        autoMapeo()
-    }
+export const SelecionColores = ({ respuestas, setRespuestas }: SelecionColoresProps) => {
 
     useEffect(() => {
-        inizialize()
-    }, [])
-    const CustomComponent = forwardRef<HTMLDivElement, any>((props, ref) => {
-        return <Grid container spacing={2} {...props} ref={ref}>{props.children}</Grid>;
-    });
+    }, [respuestas])
     return (
         <ReactSortable
-            /* tag={CustomComponent} */
             className='center MuiGrid-root MuiGrid-container css-mhc70k-MuiGrid-root '
             list={respuestas}
-            /* onMove={(e)=>{console.log(e)}} */
-            /* direction={'vertical'} */
             animation={200}
             delay={2}
             setList={setRespuestas}

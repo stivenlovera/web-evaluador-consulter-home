@@ -33,6 +33,7 @@ const EvaluacionFactorG = lazy(() => import('../Pages/evaluacion-PBL/evaluacion-
 const EvaluacionColores = lazy(() => import('../Pages/evaluacion-PBL/evaluacion-colores'));
 const EvaluacionFactorGEjemplo = lazy(() => import('../Pages/evaluacion-PBL/ejemplo-factor-g'));
 const EvaluacionRoshard = lazy(() => import('../Pages/evaluacion-PBL/evaluacion-roshard'));
+const EvaluacionHistorietas = lazy(() => import('../Pages/evaluacion-PBL/evaluacion-historietas'));
 
 const RouteApp = () => {
     const [loading, setLoading] = useState(true);
@@ -99,6 +100,8 @@ const RouteApp = () => {
                         <Route path="/evaluacion-colores/:testId/:id/:evaluacion_id" element={<EvaluacionColores />}></Route>
                         <Route path="/evaluacion-factor-g-ejemplo/:testId/:id/:evaluacion_id" element={<EvaluacionFactorGEjemplo />}></Route>
                         <Route path="/evaluacion-roshard/:testId/:id/:evaluacion_id" element={<EvaluacionRoshard />}></Route>
+                        <Route path="/evaluacion-historietas/:testId/:id/:evaluacion_id" element={<EvaluacionHistorietas />}></Route>
+                        
                     </Route>
                     <Route path='/Authenticador' element={
                         <NoProtectorRoute valid={token} redirrecTo={'/inicio'}>

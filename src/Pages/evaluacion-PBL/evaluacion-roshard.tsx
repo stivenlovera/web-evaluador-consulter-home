@@ -13,6 +13,7 @@ import { IResultadoRespuesta } from '../../Services/Interface/resultadoRespuesta
 import moment from 'moment';
 import UseTest from '../hooks/useTest';
 import { useNavigate } from 'react-router-dom';
+import ModalFinalizar from '../../Components/ModalFinalizar/ModalFinalizar';
 
 export const initialStateResultado: IResultadoTest = {
     fecha_inicio: '',
@@ -20,8 +21,9 @@ export const initialStateResultado: IResultadoTest = {
     test_id: 0,
     respuestaPreguntas: []
 }
- const EvaluacionRoshard = () => {
-    const navigate = useNavigate()
+const EvaluacionRoshard = () => {
+    const navigate = useNavigate();
+    const [modalFinalizar, setmodalFinalizar] = useState(false)
     const [loading, setLoading] = useState(true);
     const { id, testId, evaluacion_id } = useParams();
     const [test, setTest] = useState<ITest>(initialStateTest);
@@ -30,6 +32,7 @@ export const initialStateResultado: IResultadoTest = {
     const { apiCreate, apiStore } = UseTest();
 
     const procesarData = (test: ITest) => {
+        console.log(test)
         let initialStateResultado: IResultadoTest = {
             fecha_inicio: moment().format('YYYY-MM-DD HH:mm:ss'),
             respuestaPreguntas: [],
@@ -42,7 +45,7 @@ export const initialStateResultado: IResultadoTest = {
                 fecha_inicio: moment().format('YYYY-MM-DD HH:mm:ss'),
                 pregunta_id: pregunta.pregunta_id,
                 resultado_pregunta_id: 0,
-                resultado_test_id: 0,
+                resultado_test_id: test.resultado_test_id, //test.resultado_test_id add
                 resultadoRespuestas: [],
                 tiempo_duracion: 0
             }
@@ -112,10 +115,28 @@ export const initialStateResultado: IResultadoTest = {
         validationSchema,
         onSubmit: async (values) => {
             console.log('enviar', values);
-            await apiStore(values, parseInt(testId!), parseInt(id!));
-            navigate('/home')
+            await handlerFinalizar()
+            /* await apiStore(values, parseInt(testId!), parseInt(id!));
+            navigate('/home') */
         }
     });
+
+    const handlerFinalizar = async () => {
+        if (isValid) {
+            console.log(values)
+            setLoading(true)
+            const { data, status } = await apiStore(values, parseInt(testId!), parseInt(id!));
+            if (status) {
+                setLoading(false)
+                setmodalFinalizar(false)
+                navigate('/home')
+            }
+        }
+        else {
+
+        }
+    }
+
     const {
         values,
         errors,
@@ -126,6 +147,7 @@ export const initialStateResultado: IResultadoTest = {
         handleBlur,
         setValues,
         resetForm,
+        isValid
     } = formResultadosTest;
 
     const onUploadImagen = async (e: React.ChangeEvent<HTMLInputElement>, indexPregunta: number, indexRespuesta: number) => {
@@ -175,22 +197,23 @@ export const initialStateResultado: IResultadoTest = {
                                                                                     </Typography>
                                                                                     {
                                                                                         test.preguntas[i].imagen != '' ? (
-                                                                                            <Grid container spacing={0} key={i}>
+                                                                                            <Grid container spacing={0} key={i} justifyContent={'center'} alignContent={'center'} display={'flex'}>
                                                                                                 <Grid item xl={6} lg={6} md={6} sm={12} xs={12}>
                                                                                                     <CardMedia
-                                                                                                        style={{ maxWidth: '80%', margin: 'auto' }}
+                                                                                                        style={{ maxWidth: '100%', margin: 'auto' }}
                                                                                                         component="img"
                                                                                                         image={`${imagen}`}
                                                                                                         alt=""
+
                                                                                                     />
                                                                                                 </Grid>
-                                                                                                <Marcacion onPosicion={(valor) => { /* setFieldValue(`respuestaPreguntas[${id}].resultadoRespuestas[${0}].descripcion`, valor)  */}} />
+                                                                                                <Marcacion onPosicion={(valor) => { setFieldValue(`respuestaPreguntas[${i}].resultadoRespuestas[${i}].descripcion`, valor) }} />
                                                                                             </Grid>
                                                                                         )
                                                                                             : null
                                                                                     }
                                                                                     {
-                                                                                        <Grid container spacing={2}>
+                                                                                        <Grid container spacing={2} style={{ marginTop: 5 }}>
                                                                                             <FieldArray
                                                                                                 name="resultadoRespuestas"
                                                                                                 render={arrayresultadoRespuestas => {
@@ -199,12 +222,11 @@ export const initialStateResultado: IResultadoTest = {
                                                                                                         <>
                                                                                                             {resultadoResultado && resultadoResultado.length > 0 ? (
                                                                                                                 resultadoResultado.map((respuesta: IResultadoRespuesta, index: number) => {
-                                                                                                                    index=index+1;
-                                                                                                                    console.log(test.preguntas[i].respuestas[index].descripcion)
+
                                                                                                                     return (
                                                                                                                         <Grid item xs={12} md={12} key={index} >
-                                                                                                                            <div>
-                                                                                                                                <TextField
+                                                                                                                            {
+                                                                                                                                index == 0 ? null : (<TextField
                                                                                                                                     fullWidth
                                                                                                                                     label={test.preguntas[i].respuestas[index].descripcion}
                                                                                                                                     variant="filled"
@@ -213,8 +235,8 @@ export const initialStateResultado: IResultadoTest = {
                                                                                                                                     value={values.respuestaPreguntas[i].resultadoRespuestas[index].descripcion}
                                                                                                                                     onChange={handleChange}
                                                                                                                                     onBlur={handleBlur}
-                                                                                                                                />
-                                                                                                                            </div>
+                                                                                                                                />)
+                                                                                                                            }
                                                                                                                         </Grid>)
                                                                                                                 })) : null}
                                                                                                         </>
@@ -237,11 +259,13 @@ export const initialStateResultado: IResultadoTest = {
                                             <Divider sx={{ m: 1 }}></Divider>
                                             <div style={{ textAlign: 'center' }}>
                                                 <Button
-                                                    type='submit'
                                                     color='success'
                                                     size='small'
                                                     variant="contained"
                                                     sx={{ textTransform: 'none', mt: 1 }}
+                                                    onClick={() => {
+                                                        setmodalFinalizar(true)
+                                                    }}
                                                 >
                                                     Finalizar Prueba
                                                 </Button>
@@ -284,9 +308,21 @@ export const initialStateResultado: IResultadoTest = {
                                 </CardContent>
                             </React.Fragment>
                         </Card>
+
                     </Box>
                 </Grid>
             </Grid >
+            <ModalFinalizar
+                message='Esta seguro de finalizar este Test?'
+                onClose={(estado) => {
+                    if (estado) {
+                        handlerFinalizar()
+                    } else {
+                        setmodalFinalizar(false)
+                    }
+                }}
+                openModal={modalFinalizar}
+            />
         </>
     )
 }
@@ -295,39 +331,82 @@ export default EvaluacionRoshard;
 interface MarcacionPros {
     onPosicion: (posicion: string) => void;
 }
+const initialState = [
+    {
+        posicion: 0,
+        marcado: false
+    },
+    {
+        posicion: 1,
+        marcado: false
+    },
+    {
+        posicion: 2,
+        marcado: false
+    },
+    {
+        posicion: 3,
+        marcado: false
+    },
+    {
+        posicion: 4,
+        marcado: false
+    },
+    {
+        posicion: 5,
+        marcado: false
+    },
+    {
+        posicion: 6,
+        marcado: false
+    },
+    {
+        posicion: 7,
+        marcado: false
+    },
+    {
+        posicion: 8,
+        marcado: false
+    }
+];
 const Marcacion = ({ onPosicion }: MarcacionPros) => {
-    const [posiciones, setPosiciones] = useState<string>('');
+    const [posiciones, setPosiciones] = useState(initialState);
     const onSelecion = (posicion: number) => {
-        if (posiciones.includes(posicion.toString())) {
-            setPosiciones(`${posiciones}`)
-        } else {
-            posiciones.replace(posicion.toString(), "");
-            setPosiciones(`${posiciones}`)
-        }
-        onPosicion(posiciones);
+        posiciones[posicion].marcado = !posiciones[posicion].marcado;
+        setPosiciones(posiciones);
+        const valores: number[] = []
+        posiciones.map((posicion) => {
+            if (posicion.marcado) {
+                valores.push(posicion.posicion)
+            }
+        })
+        const replace = valores.toString();
+        onPosicion(replace)
     }
-    const colorSeleccion = (i: number) => {
-        if (posiciones.includes(i.toString())) {
-            return '#E8E8E8'
-        } else {
-            return '#FFFFFF'
-        }
-    }
+    useEffect(() => {
+
+    }, [posiciones])
+
     return (
         <Grid item xl={6} lg={6} md={6} sm={12} xs={12}>
-            <Grid container spacing={0}>
-                {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((posicion, i) => {
+            <Grid
+                container
+                spacing={0}
+                direction="row"
+                justifyContent="center"
+                alignItems="center"
+            >
+                {posiciones.map((posicion, i) => {
                     return (
-                        <Grid item xl={6} lg={6} md={6} sm={12} xs={4} key={i}>
+                        <Grid item xl={4} lg={4} md={4} sm={4} xs={4} key={i}>
                             <Paper
                                 sx={{
                                     height: 100,
-                                    width: 100,
-                                    backgroundColor: colorSeleccion(i)
-
+                                    width: 'auto',
+                                    background: posicion.marcado ? '#E8E8E8' : '#FFFFFF'
                                 }}
                                 onClick={() => {
-                                    onSelecion(i)
+                                    onSelecion(posicion.posicion)
                                 }}
                             />
                         </Grid>

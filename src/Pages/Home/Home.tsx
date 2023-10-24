@@ -65,6 +65,9 @@ const Home = () => {
       case 12:
         route = `/evaluacion-colores/${test_id}/${id}/${evaluacion_id}`;
         break;
+      case 13:
+        route = `/evaluacion-historietas/${test_id}/${id}/${evaluacion_id}`;
+        break;
       default:
         route = `/evaluacion-unica/${test_id}/${id}/${evaluacion_id}`;
     }
