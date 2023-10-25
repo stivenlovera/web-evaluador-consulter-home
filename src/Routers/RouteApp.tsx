@@ -75,12 +75,8 @@ const RouteApp = () => {
             if (url != null) {
                 onLoad(url);
             }
-            return;
         } else {
             getAuth();
-
-            return;
-
         }
     }, [token])
 

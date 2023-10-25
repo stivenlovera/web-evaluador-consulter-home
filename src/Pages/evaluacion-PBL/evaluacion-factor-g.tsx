@@ -71,6 +71,7 @@ const EvaluacionFactorG = () => {
         setLoading(true);
         const { data, status } = await apiCreate(parseInt(testId!), parseInt(id!), parseInt(evaluacion_id!));
         if (status) {
+            console.log(data!.activarTiempo, data!.tiempoTranscurrido)
             setTranscurrido(data!.tiempoTranscurrido);
             setIniciar(data!.activarTiempo);
             /* restart(new Date(formatted), true) */
@@ -145,7 +146,6 @@ const EvaluacionFactorG = () => {
             respuesta.valor = '0';
         });
 
-        setValues(values);
         setFieldValue(`respuestaPreguntas[${indexPregunta}].resultadoRespuestas[${indexRespuesta}].valor`, '1');
         setFieldValue(`respuestaPreguntas[${indexPregunta}].resultadoRespuestas[${indexRespuesta}].descripcion`, descripcion);
     }
@@ -157,7 +157,6 @@ const EvaluacionFactorG = () => {
             const { data, status } = await apiStore(values, parseInt(testId!), parseInt(id!));
             if (status) {
                 setLoading(false)
-             
                 navigate('/home')
             }
         }
@@ -175,17 +174,11 @@ const EvaluacionFactorG = () => {
             </Backdrop>
             <Grid container spacing={2}>
                 <Grid item xs={12} md={12}>
-                    <Card variant="outlined">
-                        <React.Fragment>
-                            <CardContent>
-                                <Timer
-                                    expiryTimestamp={moment().add(transcurrido, 'second').toDate()}
-                                    iniciar={iniciar}
-                                    onExpire={() => { handlerFinalizar() }}
-                                ></Timer>
-                            </CardContent>
-                        </React.Fragment>
-                    </Card>
+                    <Timer
+                        expiryTimestamp={moment().add(transcurrido, 'second').toDate()}
+                        iniciar={iniciar}
+                        onExpire={() => { handlerFinalizar() }}
+                    ></Timer>
                 </Grid>
                 <Grid item xs={12} md={8}>
                     <Box sx={{ minWidth: 275 }}>
@@ -358,7 +351,7 @@ const EvaluacionFactorG = () => {
                         console.log(estado)
                         if (estado) {
                             handlerFinalizar()
-                        }else{
+                        } else {
                             setmodalFinalizar(false);
                         }
                     }}

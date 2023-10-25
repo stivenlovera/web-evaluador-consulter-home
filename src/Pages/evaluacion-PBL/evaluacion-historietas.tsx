@@ -80,6 +80,7 @@ const EvaluacionHistorietas = () => {
         if (status) {
             setTranscurrido(data!.tiempoTranscurrido);
             setIniciar(data!.activarTiempo);
+            console.log(data)
             /* restart(new Date(formatted), true) */
             if (data?.completado == 'si') {
                 enqueueSnackbar('Test ya fue registrado', { variant: 'error' })
@@ -160,13 +161,13 @@ const EvaluacionHistorietas = () => {
     const handlerFinalizar = async () => {
         if (isValid) {
             console.log(values)
-            /* setLoading(true)
+            setLoading(true)
             const { data, status } = await apiStore(values, parseInt(testId!), parseInt(id!));
             if (status) {
                 setLoading(false)
                 setmodalFinalizar(false)
                 navigate('/home')
-            } */
+            }
         }
         else {
 

@@ -160,13 +160,13 @@ const EvaluacionColores = () => {
     const handlerFinalizar = async () => {
         if (isValid) {
             console.log(values)
-            /* setLoading(true)
+            setLoading(true)
             const { data, status } = await apiStore(values, parseInt(testId!), parseInt(id!));
             if (status) {
                 setLoading(false)
                 setmodalFinalizar(false)
                 navigate('/home')
-            } */
+            }
         }
         else {
 
@@ -265,7 +265,7 @@ const EvaluacionColores = () => {
                                                                                                                         imagen: data.imagen,
                                                                                                                         descripcion: data.descripcion,
                                                                                                                         procesar: data.procesar,
-                                                                                                                        valor: data.valor,
+                                                                                                                        valor: data.descripcion,
                                                                                                                     }
                                                                                                                     return res;
                                                                                                                 })
