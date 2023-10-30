@@ -1,4 +1,4 @@
-import { Backdrop, Box, Button, Card, CardContent, CardMedia, CircularProgress, Divider, Grid, Paper, TextField, Typography } from '@mui/material'
+import { Backdrop, Box, Button, Card, CardContent, CardMedia, CircularProgress, Divider, FormControl, Grid, InputLabel, MenuItem, Paper, TextField, Typography } from '@mui/material'
 import React, { useEffect, useRef, useState } from 'react'
 import { useParams } from "react-router-dom";
 import { ITest, initialStateTest } from '../../Services/Interface/ITest';
@@ -14,6 +14,7 @@ import moment from 'moment';
 import UseTest from '../hooks/useTest';
 import { useNavigate } from 'react-router-dom';
 import ModalFinalizar from '../../Components/ModalFinalizar/ModalFinalizar';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
 
 export const initialStateResultado: IResultadoTest = {
     fecha_inicio: '',
@@ -27,7 +28,7 @@ const EvaluacionRoshard = () => {
     const [loading, setLoading] = useState(true);
     const { id, testId, evaluacion_id } = useParams();
     const [test, setTest] = useState<ITest>(initialStateTest);
-    const myRefname = useRef<HTMLInputElement>(null);
+
 
     const { apiCreate, apiStore } = UseTest();
 
@@ -204,10 +205,8 @@ const EvaluacionRoshard = () => {
                                                                                                         component="img"
                                                                                                         image={`${imagen}`}
                                                                                                         alt=""
-
                                                                                                     />
                                                                                                 </Grid>
-                                                                                                <Marcacion onPosicion={(valor) => { setFieldValue(`respuestaPreguntas[${i}].resultadoRespuestas[${i}].descripcion`, valor) }} />
                                                                                             </Grid>
                                                                                         )
                                                                                             : null
@@ -226,7 +225,7 @@ const EvaluacionRoshard = () => {
                                                                                                                     return (
                                                                                                                         <Grid item xs={12} md={12} key={index} >
                                                                                                                             {
-                                                                                                                                index == 0 ? null : (<TextField
+                                                                                                                                index == 0 ? (<TextField
                                                                                                                                     fullWidth
                                                                                                                                     label={test.preguntas[i].respuestas[index].descripcion}
                                                                                                                                     variant="filled"
@@ -235,7 +234,24 @@ const EvaluacionRoshard = () => {
                                                                                                                                     value={values.respuestaPreguntas[i].resultadoRespuestas[index].descripcion}
                                                                                                                                     onChange={handleChange}
                                                                                                                                     onBlur={handleBlur}
-                                                                                                                                />)
+                                                                                                                                />) : null
+                                                                                                                            }
+                                                                                                                            {
+                                                                                                                                index == 1 ? (
+                                                                                                                                    <Marcacion
+                                                                                                                                        onPosicion={(valor) => { console.log(valor); setFieldValue(`respuestaPreguntas[${i}].resultadoRespuestas[${index}].descripcion`, valor) }}
+                                                                                                                                        posiciones={values.respuestaPreguntas[i].resultadoRespuestas[index].descripcion}
+                                                                                                                                    />
+                                                                                                                                ) : null
+                                                                                                                            }
+                                                                                                                            {
+                                                                                                                                index == 2 ? (
+                                                                                                                                    <SeleccionOpcion
+                                                                                                                                        name={`respuestaPreguntas[${i}].resultadoRespuestas[${index}].descripcion`}
+                                                                                                                                        setFieldValue={setFieldValue}
+                                                                                                                                        key={index}
+                                                                                                                                    />
+                                                                                                                                ) : null
                                                                                                                             }
                                                                                                                         </Grid>)
                                                                                                                 })) : null}
@@ -330,90 +346,232 @@ const EvaluacionRoshard = () => {
 export default EvaluacionRoshard;
 interface MarcacionPros {
     onPosicion: (posicion: string) => void;
+    posiciones: string;
 }
-const initialState = [
-    {
-        posicion: 0,
-        marcado: false
-    },
-    {
-        posicion: 1,
-        marcado: false
-    },
-    {
-        posicion: 2,
-        marcado: false
-    },
-    {
-        posicion: 3,
-        marcado: false
-    },
-    {
-        posicion: 4,
-        marcado: false
-    },
-    {
-        posicion: 5,
-        marcado: false
-    },
-    {
-        posicion: 6,
-        marcado: false
-    },
-    {
-        posicion: 7,
-        marcado: false
-    },
-    {
-        posicion: 8,
-        marcado: false
-    }
-];
-const Marcacion = ({ onPosicion }: MarcacionPros) => {
-    const [posiciones, setPosiciones] = useState(initialState);
-    const onSelecion = (posicion: number) => {
-        posiciones[posicion].marcado = !posiciones[posicion].marcado;
-        setPosiciones(posiciones);
-        const valores: number[] = []
-        posiciones.map((posicion) => {
-            if (posicion.marcado) {
-                valores.push(posicion.posicion)
-            }
-        })
-        const replace = valores.toString();
-        onPosicion(replace)
-    }
+const Marcacion = ({ onPosicion, posiciones }: MarcacionPros) => {
+
     useEffect(() => {
 
-    }, [posiciones])
+    }, [])
 
     return (
-        <Grid item xl={6} lg={6} md={6} sm={12} xs={12}>
-            <Grid
-                container
-                spacing={0}
-                direction="row"
-                justifyContent="center"
-                alignItems="center"
-            >
-                {posiciones.map((posicion, i) => {
-                    return (
-                        <Grid item xl={4} lg={4} md={4} sm={4} xs={4} key={i}>
-                            <Paper
-                                sx={{
-                                    height: 100,
-                                    width: 'auto',
-                                    background: posicion.marcado ? '#E8E8E8' : '#FFFFFF'
-                                }}
-                                onClick={() => {
-                                    onSelecion(posicion.posicion)
-                                }}
-                            />
-                        </Grid>
-                    )
-                })}
+        <Grid container spacing={0} justifyContent={'center'} alignContent={'center'} display={'flex'}>
+            <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
+                <Typography align='center'>
+                    Selecione donde lo ve
+                </Typography>
+            </Grid>
+            <Grid item xl={6} lg={6} md={8} sm={12} xs={12}>
+                <Grid container spacing={0} justifyContent={'center'} alignContent={'center'} display={'flex'}>
+                    <Grid item xl={4} lg={4} md={4} sm={4} xs={4}>
+                        <Paper
+                            sx={{
+                                height: 100,
+                                width: 'auto',
+                                background: posiciones.includes('0') ? '#E8E8E8' : '#FFFFFF'
+                            }}
+                            onClick={() => {
+                                if (!posiciones.includes('0')) {
+                                    posiciones += '0';
+                                    console.log('adicion')
+                                } else {
+                                    const posicion = posiciones.search('0');
+                                    posiciones.substring(posicion, posiciones.length - 1)
+                                    console.log( 'no adicion',posicion)
+                                }
+                                onPosicion(posiciones)
+                            }}
+                        />
+                    </Grid>
+                    <Grid item xl={4} lg={4} md={4} sm={4} xs={4}>
+                        <Paper
+                            sx={{
+                                height: 100,
+                                width: 'auto',
+                                background: posiciones.includes('1') ? '#E8E8E8' : '#FFFFFF'
+                            }}
+                            onClick={() => {
+                                if (!posiciones.includes('1')) {
+                                    posiciones += '1';
+                                    console.log('adicion')
+                                } else {
+                                    const posicion = posiciones.search('1');
+                                    posiciones.substring(posicion, posiciones.length - 1)
+                                    console.log( 'no adicion',posicion)
+                                }
+                                onPosicion(posiciones)
+                            }}
+                        />
+                    </Grid>
+                    <Grid item xl={4} lg={4} md={4} sm={4} xs={4}>
+                        <Paper
+                            sx={{
+                                height: 100,
+                                width: 'auto',
+                                background: posiciones.includes('2') ? '#E8E8E8' : '#FFFFFF'
+                            }}
+                            onClick={() => {
+                                if (!posiciones.includes('2')) {
+                                    posiciones += '2';
+                                    console.log('adicion')
+                                } else {
+                                    const posicion = posiciones.search('2');
+                                    posiciones.substring(posicion, posiciones.length - 1)
+                                    console.log( 'no adicion',posicion)
+                                }
+                                onPosicion(posiciones)
+                            }}
+                        />
+                    </Grid>
+                    <Grid item xl={4} lg={4} md={4} sm={4} xs={4}>
+                        <Paper
+                            sx={{
+                                height: 100,
+                                width: 'auto',
+                                background: posiciones.includes('3') ? '#E8E8E8' : '#FFFFFF'
+                            }}
+                            onClick={() => {
+                                if (!posiciones.includes('3')) {
+                                    posiciones += '3';
+                                    console.log('adicion')
+                                } else {
+                                    const posicion = posiciones.search('3');
+                                    posiciones.substring(posicion, posiciones.length - 1)
+                                    console.log( 'no adicion',posicion)
+                                }
+                                onPosicion(posiciones)
+                            }}
+                        />
+                    </Grid>
+                    <Grid item xl={4} lg={4} md={4} sm={4} xs={4}>
+                        <Paper
+                            sx={{
+                                height: 100,
+                                width: 'auto',
+                                background: posiciones.includes('4') ? '#E8E8E8' : '#FFFFFF'
+                            }}
+                            onClick={() => {
+                                if (!posiciones.includes('4')) {
+                                    posiciones += '4';
+                                    console.log('adicion')
+                                } else {
+                                    const posicion = posiciones.search('4');
+                                    posiciones.substring(posicion, posiciones.length - 1)
+                                    console.log( 'no adicion',posicion)
+                                }
+                                onPosicion(posiciones)
+                            }}
+                        />
+                    </Grid>
+                    <Grid item xl={4} lg={4} md={4} sm={4} xs={4}>
+                        <Paper
+                            sx={{
+                                height: 100,
+                                width: 'auto',
+                                background: posiciones.includes('5') ? '#E8E8E8' : '#FFFFFF'
+                            }}
+                            onClick={() => {
+                                if (!posiciones.includes('5')) {
+                                    posiciones += '5';
+                                    console.log('adicion')
+                                } else {
+                                    const posicion = posiciones.search('5');
+                                    posiciones.substring(posicion, posiciones.length - 1)
+                                    console.log( 'no adicion',posicion)
+                                }
+                                onPosicion(posiciones)
+                            }}
+                        />
+                    </Grid>
+                    <Grid item xl={4} lg={4} md={4} sm={4} xs={4}>
+                        <Paper
+                            sx={{
+                                height: 100,
+                                width: 'auto',
+                                background: posiciones.includes('6') ? '#E8E8E8' : '#FFFFFF'
+                            }}
+                            onClick={() => {
+                                if (!posiciones.includes('6')) {
+                                    posiciones += '6';
+                                    console.log('adicion')
+                                } else {
+                                    const posicion = posiciones.search('6');
+                                    posiciones.substring(posicion, posiciones.length - 1)
+                                    console.log( 'no adicion',posicion)
+                                }
+                                onPosicion(posiciones)
+                            }}
+                        />
+                    </Grid>
+                    <Grid item xl={4} lg={4} md={4} sm={4} xs={4}>
+                        <Paper
+                            sx={{
+                                height: 100,
+                                width: 'auto',
+                                background: posiciones.includes('7') ? '#E8E8E8' : '#FFFFFF'
+                            }}
+                            onClick={() => {
+                                if (!posiciones.includes('7')) {
+                                    posiciones += '7';
+                                    console.log('adicion')
+                                } else {
+                                    const posicion = posiciones.search('7');
+                                    posiciones.substring(posicion, posiciones.length - 1)
+                                    console.log( 'no adicion',posicion)
+                                }
+                                onPosicion(posiciones)
+                            }}
+                        />
+                    </Grid>
+                    <Grid item xl={4} lg={4} md={4} sm={4} xs={4}>
+                        <Paper
+                            sx={{
+                                height: 100,
+                                width: 'auto',
+                                background: posiciones.includes('8') ? '#E8E8E8' : '#FFFFFF'
+                            }}
+                            onClick={() => {
+                                if (!posiciones.includes('8')) {
+                                    posiciones += '8';
+                                    console.log('adicion')
+                                } else {
+                                    const posicion = posiciones.search('8');
+                                    posiciones.substring(posicion, posiciones.length - 1)
+                                    console.log('no adicion', posicion)
+                                }
+                            }}
+                        />
+                    </Grid>
+                </Grid>
             </Grid>
         </Grid>
     )
 }
-
+interface SeleccionOpcionProps {
+    name: string;
+    setFieldValue: (name: string, valor: string) => void;
+}
+const SeleccionOpcion = ({ name, setFieldValue }: SeleccionOpcionProps) => {
+    const [seleccion, setSeleccion] = React.useState('');
+    return (
+        <FormControl fullWidth size='small'>
+            <InputLabel id="demo-simple-select-label">Seleccione por que lo ve</InputLabel>
+            <Select
+                value={seleccion}
+                label="Seleccione por que lo ve"
+                onChange={(event) => {
+                    event.target.value as string
+                    setFieldValue(name, event.target.value as string)
+                    setSeleccion(event.target.value as string);
+                }}
+            >
+                <MenuItem value={'Por su forma'}>Por su forma</MenuItem>
+                <MenuItem value={'Por su color'}>Por su color</MenuItem>
+                <MenuItem value={'Por la perspectiva'}>Por la perspectiva</MenuItem>
+                <MenuItem value={'Por su textura'}>Por su textura</MenuItem>
+                <MenuItem value={'Por su color y forma'}>Por su color y forma</MenuItem>
+                <MenuItem value={'Por su forma y color'}>Por su forma y color</MenuItem>
+            </Select>
+        </FormControl>
+    )
+}

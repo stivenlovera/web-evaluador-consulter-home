@@ -21,7 +21,7 @@ export const initialStateResultado: IResultadoTest = {
     test_id: 0,
     respuestaPreguntas: []
 }
-const EvaluacionRespUnica = () => {
+const EvaluacionRespUnicaMMPI = () => {
     const navigate = useNavigate();
     const [modalFinalizar, setmodalFinalizar] = useState(false)
     const [loading, setLoading] = useState(true);
@@ -140,8 +140,15 @@ const EvaluacionRespUnica = () => {
         values.respuestaPreguntas[indexPregunta].resultadoRespuestas.map((respuesta: IResultadoRespuesta) => {
             return respuesta.valor = '0';
         });
+
         setValues(values);
         setFieldValue(name, '1');
+       /*  setFieldValue(`respuestaPreguntas[${indexPregunta}].resultadoRespuestas[${70}].valor`, '0');
+        setFieldValue(`respuestaPreguntas[${indexPregunta}].resultadoRespuestas[${71}].valor`, '0');
+        setFieldValue(`respuestaPreguntas[${indexPregunta}].resultadoRespuestas[${72}].valor`, '0');
+        setFieldValue(`respuestaPreguntas[${indexPregunta}].resultadoRespuestas[${73}].valor`, '0');
+        setFieldValue(`respuestaPreguntas[${indexPregunta}].resultadoRespuestas[${74}].valor`, '0'); */
+        console.log(values)
     }
 
     const handlerFinalizar = async (estado: boolean) => {
@@ -226,23 +233,15 @@ const EvaluacionRespUnica = () => {
                                                                                                                                 <FormControlLabel value="" control={
                                                                                                                                     <Radio
                                                                                                                                         checked={values.respuestaPreguntas[i].resultadoRespuestas[index].valor === '1'}
-                                                                                                                                        onChange={() => { seleccionUnica(`respuestaPreguntas[${i}].resultadoRespuestas[${index}].valor`, i, test.preguntas[i].respuestas[index].valor) }}
+                                                                                                                                        onChange={() => {
+                                                                                                                                            seleccionUnica(`respuestaPreguntas[${i}].resultadoRespuestas[${index}].valor`, i, test.preguntas[i].respuestas[index].valor)
+                                                                                                                                        }}
                                                                                                                                         value={values.respuestaPreguntas[i].resultadoRespuestas[index].valor}
                                                                                                                                         name={`respuestaPreguntas[${i}].resultadoRespuestas[${index}].valor`}
                                                                                                                                         inputProps={{ 'aria-label': '1' }}
 
                                                                                                                                     />
-                                                                                                                                } label={`${index == 0 ? 'A.- ' : 'B.- '} ${test.preguntas[i].respuestas[index].descripcion}`} />
-                                                                                                                                {/* <TextField
-                                                                                                                                    fullWidth
-                                                                                                                                    label={test.preguntas[i].respuestas[index].descripcion}
-                                                                                                                                    variant="filled"
-                                                                                                                                    size='small'
-                                                                                                                                    name={`respuestaPreguntas[${i}].resultadoRespuestas[${index}].descripcion`}
-                                                                                                                                    value={values.respuestaPreguntas[i].resultadoRespuestas[index].descripcion}
-                                                                                                                                    onChange={handleChange}
-                                                                                                                                    onBlur={handleBlur}
-                                                                                                                                    /> */}
+                                                                                                                                } label={`${test.preguntas[i].respuestas[index].descripcion}`} />
                                                                                                                             </div>
                                                                                                                         </Grid>)
                                                                                                                 })) : null}
@@ -328,4 +327,4 @@ const EvaluacionRespUnica = () => {
     )
 }
 
-export default EvaluacionRespUnica
+export default EvaluacionRespUnicaMMPI

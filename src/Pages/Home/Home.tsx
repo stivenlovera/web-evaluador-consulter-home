@@ -59,6 +59,9 @@ const Home = () => {
       case 7:
         route = `/evaluacion-kuden/${test_id}/${id}/${evaluacion_id}`;
         break;
+      case 8:
+        route = `/evaluacion-mmpi/${test_id}/${id}/${evaluacion_id}`;
+        break;
       case 11:
         route = `/evaluacion-factor-g/${test_id}/${id}/${evaluacion_id}`;
         break;
