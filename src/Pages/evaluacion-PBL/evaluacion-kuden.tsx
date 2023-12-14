@@ -26,7 +26,7 @@ const EvaluacionRespKuden = () => {
     const navigate = useNavigate();
     const [modalFinalizar, setmodalFinalizar] = useState(false)
     const [loading, setLoading] = useState(true);
-    const { id, testId,evaluacion_id } = useParams();
+    const { id, testId, evaluacion_id } = useParams();
     const [test, setTest] = useState<ITest>(initialStateTest);
     const myRefname = useRef<HTMLInputElement>(null);
 
@@ -55,8 +55,8 @@ const EvaluacionRespKuden = () => {
                     respuesta_id: respuesta.respuesta_id,
                     resultado_pregunta_id: 0,
                     resultado_respuesta_id: 0,
-                    valor: '0',
-                    imagen:''
+                    valor: '',
+                    imagen: ''
                 }
                 resultadoPregunta.resultadoRespuestas.push(respuestaRespuesta);
             })
@@ -135,19 +135,16 @@ const EvaluacionRespKuden = () => {
         const converImagen = await readUploadedFileAsText(e);
         console.log(converImagen)
         setFieldValue(`respuestaPreguntas[${indexRespuesta}].resultadoRespuestas[${indexRespuesta}].descripcion`, converImagen);
-        console.log(values.respuestaPreguntas[indexPregunta].resultadoRespuestas[indexRespuesta].descripcion)
+        //console.log(values.respuestaPreguntas[indexPregunta].resultadoRespuestas[indexRespuesta].descripcion)
     }
     const seleccionUnica = (name: string, indexPregunta: number, valor: string) => {
-        values.respuestaPreguntas[indexPregunta].resultadoRespuestas.map((respuesta: IResultadoRespuesta) => {
-            return respuesta.valor = '0';
-        });
-        setValues(values);
-        setFieldValue(name, '1');
+        setFieldValue(name, valor);
     }
 
     const handlerFinalizar = async (estado: boolean) => {
         if (estado) {
             setLoading(true)
+            //console.log(values)
             await apiStore(values, parseInt(testId!), parseInt(id!));
             setLoading(false)
             navigate('/home')
@@ -223,33 +220,13 @@ const EvaluacionRespKuden = () => {
                                                                                                                         : `${process.env.REACT_APP_API_RESPUESTA}${values.respuestaPreguntas[i].resultadoRespuestas[index].descripcion}`;
                                                                                                                     return (
                                                                                                                         <Grid item xs={12} md={12} key={index} style={{ paddingTop: 0, paddingLeft: 30 }} >
-                                                                                                                            <div>
-                                                                                                                                <FormControlLabel value="" control={
-                                                                                                                                    <Radio
-                                                                                                                                        checked={values.respuestaPreguntas[i].resultadoRespuestas[index].valor === '1'}
-                                                                                                                                        onChange={() => { seleccionUnica(`respuestaPreguntas[${i}].resultadoRespuestas[${index}].valor`, i, test.preguntas[i].respuestas[index].valor) }}
-                                                                                                                                        value={values.respuestaPreguntas[i].resultadoRespuestas[index].valor}
-                                                                                                                                        name={`respuestaPreguntas[${i}].resultadoRespuestas[${index}].valor`}
-                                                                                                                                        inputProps={{ 'aria-label': '1' }}
-
-                                                                                                                                    />
-                                                                                                                                }
-                                                                                                                                    label={'me gusta'}
-                                                                                                                                />
-                                                                                                                                <FormControlLabel value="" control={
-                                                                                                                                    <Radio
-                                                                                                                                        checked={values.respuestaPreguntas[i].resultadoRespuestas[index].valor === '2'}
-                                                                                                                                        onChange={() => { seleccionUnica(`respuestaPreguntas[${i}].resultadoRespuestas[${index}].valor`, i, test.preguntas[i].respuestas[index].valor) }}
-                                                                                                                                        value={values.respuestaPreguntas[i].resultadoRespuestas[index].valor}
-                                                                                                                                        name={`respuestaPreguntas[${i}].resultadoRespuestas[${index}].valor`}
-                                                                                                                                        inputProps={{ 'aria-label': '1' }}
-
-                                                                                                                                    />
-                                                                                                                                }
-                                                                                                                                    label={'no me gusta'}
-                                                                                                                                />
-                                                                                                                                <FormLabel>{test.preguntas[i].respuestas[index].descripcion} </FormLabel>
-                                                                                                                            </div>
+                                                                                                                            <OpcionResultado
+                                                                                                                                descripcion={test.preguntas[i].respuestas[index].descripcion}
+                                                                                                                                name={`respuestaPreguntas[${i}].resultadoRespuestas[${index}].valor`}
+                                                                                                                                onData={(dataValues) => { seleccionUnica(`respuestaPreguntas[${i}].resultadoRespuestas[${index}].valor`, i, dataValues); console.log(dataValues) }}
+                                                                                                                                value={values.respuestaPreguntas[i].resultadoRespuestas[index].valor}
+                                                                                                                                disabled={false}
+                                                                                                                            />
                                                                                                                         </Grid>)
                                                                                                                 })) : null}
                                                                                                         </>
@@ -334,4 +311,63 @@ const EvaluacionRespKuden = () => {
     )
 }
 
-export default EvaluacionRespKuden
+export default EvaluacionRespKuden;
+
+interface OpcionResultadoProps {
+    name: string;
+    descripcion: string;
+    value: string;
+    disabled: boolean;
+    onData: (value: string) => void
+}
+interface Options {
+    value: string;
+    valor: boolean;
+}
+const initialOptions: Options[] = [
+    {
+        value: 'Me gusta',
+        valor: false
+    },
+    {
+        value: 'No me gusta',
+        valor: false
+    }
+]
+const OpcionResultado = ({ descripcion, name, onData, value, disabled }: OpcionResultadoProps) => {
+
+    const [opcion, setOpcion] = useState<Options[]>(initialOptions);
+    const verificar = (value: string) => {
+        const verificar = opcion.find(e => e.value == value);
+        //console.log(verificar)
+        if (verificar) {
+            return verificar.value;
+        } else {
+            return '';
+        }
+    }
+    return (
+        <div>
+            {
+                opcion.map((ele, i) => {
+                    return (
+                        <FormControlLabel value="" key={i} control={
+                            <Radio
+                                checked={verificar(value) == ele.value ? true : false}
+                                onChange={() => {console.log('click'); opcion[i].valor = !ele.valor; setOpcion(opcion); onData(ele.value) }}
+                                value={value}
+                                name={name}
+                                inputProps={{ 'aria-label': '1' }}
+                                disabled={disabled}
+                            />
+                        }
+                            label={ele.value}
+                        />
+                    )
+                })
+            }
+            <FormLabel>{descripcion} </FormLabel>
+        </div>
+    )
+}
+

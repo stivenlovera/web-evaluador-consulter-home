@@ -169,7 +169,7 @@ const EvaluacionRoshard = () => {
                 <Grid item xs={12} md={8}>
                     <Box sx={{ minWidth: 275 }}>
                         <FormikProvider value={formResultadosTest}>
-                            <Form onSubmit={(e) => { console.log(values); handleSubmit(e) }}>
+                            <Form onSubmit={(e) => { console.log(values); /* handleSubmit(e) */ }}>
                                 <Card variant="outlined">
                                     <React.Fragment>
                                         <CardContent>
@@ -348,200 +348,85 @@ interface MarcacionPros {
     onPosicion: (posicion: string) => void;
     posiciones: string;
 }
+interface Imagen {
+    posicion: number,
+    valor: boolean
+}
+const initialImagen: Imagen[] = [
+    {
+        posicion: 1,
+        valor: false
+    },
+    {
+        posicion: 2,
+        valor: false
+    },
+    {
+        posicion: 3,
+        valor: false
+    },
+    {
+        posicion: 4,
+        valor: false
+    },
+    {
+        posicion: 5,
+        valor: false
+    },
+    {
+        posicion: 6,
+        valor: false
+    },
+    {
+        posicion: 7,
+        valor: false
+    },
+    {
+        posicion: 8,
+        valor: false
+    },
+    {
+        posicion: 9,
+        valor: false
+    }
+];
 const Marcacion = ({ onPosicion, posiciones }: MarcacionPros) => {
-
+    const [imagen, setImagen] = useState<Imagen[]>(initialImagen);
     useEffect(() => {
-
-    }, [])
+    }, [imagen])
 
     return (
         <Grid container spacing={0} justifyContent={'center'} alignContent={'center'} display={'flex'}>
             <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
                 <Typography align='center'>
-                    Selecione donde lo ve
+                    Seleccione donde lo ve
                 </Typography>
             </Grid>
             <Grid item xl={6} lg={6} md={8} sm={12} xs={12}>
                 <Grid container spacing={0} justifyContent={'center'} alignContent={'center'} display={'flex'}>
-                    <Grid item xl={4} lg={4} md={4} sm={4} xs={4}>
-                        <Paper
-                            sx={{
-                                height: 100,
-                                width: 'auto',
-                                background: posiciones.includes('0') ? '#E8E8E8' : '#FFFFFF'
-                            }}
-                            onClick={() => {
-                                if (!posiciones.includes('0')) {
-                                    posiciones += '0';
-                                    console.log('adicion')
-                                } else {
-                                    const posicion = posiciones.search('0');
-                                    posiciones.substring(posicion, posiciones.length - 1)
-                                    console.log( 'no adicion',posicion)
-                                }
-                                onPosicion(posiciones)
-                            }}
-                        />
-                    </Grid>
-                    <Grid item xl={4} lg={4} md={4} sm={4} xs={4}>
-                        <Paper
-                            sx={{
-                                height: 100,
-                                width: 'auto',
-                                background: posiciones.includes('1') ? '#E8E8E8' : '#FFFFFF'
-                            }}
-                            onClick={() => {
-                                if (!posiciones.includes('1')) {
-                                    posiciones += '1';
-                                    console.log('adicion')
-                                } else {
-                                    const posicion = posiciones.search('1');
-                                    posiciones.substring(posicion, posiciones.length - 1)
-                                    console.log( 'no adicion',posicion)
-                                }
-                                onPosicion(posiciones)
-                            }}
-                        />
-                    </Grid>
-                    <Grid item xl={4} lg={4} md={4} sm={4} xs={4}>
-                        <Paper
-                            sx={{
-                                height: 100,
-                                width: 'auto',
-                                background: posiciones.includes('2') ? '#E8E8E8' : '#FFFFFF'
-                            }}
-                            onClick={() => {
-                                if (!posiciones.includes('2')) {
-                                    posiciones += '2';
-                                    console.log('adicion')
-                                } else {
-                                    const posicion = posiciones.search('2');
-                                    posiciones.substring(posicion, posiciones.length - 1)
-                                    console.log( 'no adicion',posicion)
-                                }
-                                onPosicion(posiciones)
-                            }}
-                        />
-                    </Grid>
-                    <Grid item xl={4} lg={4} md={4} sm={4} xs={4}>
-                        <Paper
-                            sx={{
-                                height: 100,
-                                width: 'auto',
-                                background: posiciones.includes('3') ? '#E8E8E8' : '#FFFFFF'
-                            }}
-                            onClick={() => {
-                                if (!posiciones.includes('3')) {
-                                    posiciones += '3';
-                                    console.log('adicion')
-                                } else {
-                                    const posicion = posiciones.search('3');
-                                    posiciones.substring(posicion, posiciones.length - 1)
-                                    console.log( 'no adicion',posicion)
-                                }
-                                onPosicion(posiciones)
-                            }}
-                        />
-                    </Grid>
-                    <Grid item xl={4} lg={4} md={4} sm={4} xs={4}>
-                        <Paper
-                            sx={{
-                                height: 100,
-                                width: 'auto',
-                                background: posiciones.includes('4') ? '#E8E8E8' : '#FFFFFF'
-                            }}
-                            onClick={() => {
-                                if (!posiciones.includes('4')) {
-                                    posiciones += '4';
-                                    console.log('adicion')
-                                } else {
-                                    const posicion = posiciones.search('4');
-                                    posiciones.substring(posicion, posiciones.length - 1)
-                                    console.log( 'no adicion',posicion)
-                                }
-                                onPosicion(posiciones)
-                            }}
-                        />
-                    </Grid>
-                    <Grid item xl={4} lg={4} md={4} sm={4} xs={4}>
-                        <Paper
-                            sx={{
-                                height: 100,
-                                width: 'auto',
-                                background: posiciones.includes('5') ? '#E8E8E8' : '#FFFFFF'
-                            }}
-                            onClick={() => {
-                                if (!posiciones.includes('5')) {
-                                    posiciones += '5';
-                                    console.log('adicion')
-                                } else {
-                                    const posicion = posiciones.search('5');
-                                    posiciones.substring(posicion, posiciones.length - 1)
-                                    console.log( 'no adicion',posicion)
-                                }
-                                onPosicion(posiciones)
-                            }}
-                        />
-                    </Grid>
-                    <Grid item xl={4} lg={4} md={4} sm={4} xs={4}>
-                        <Paper
-                            sx={{
-                                height: 100,
-                                width: 'auto',
-                                background: posiciones.includes('6') ? '#E8E8E8' : '#FFFFFF'
-                            }}
-                            onClick={() => {
-                                if (!posiciones.includes('6')) {
-                                    posiciones += '6';
-                                    console.log('adicion')
-                                } else {
-                                    const posicion = posiciones.search('6');
-                                    posiciones.substring(posicion, posiciones.length - 1)
-                                    console.log( 'no adicion',posicion)
-                                }
-                                onPosicion(posiciones)
-                            }}
-                        />
-                    </Grid>
-                    <Grid item xl={4} lg={4} md={4} sm={4} xs={4}>
-                        <Paper
-                            sx={{
-                                height: 100,
-                                width: 'auto',
-                                background: posiciones.includes('7') ? '#E8E8E8' : '#FFFFFF'
-                            }}
-                            onClick={() => {
-                                if (!posiciones.includes('7')) {
-                                    posiciones += '7';
-                                    console.log('adicion')
-                                } else {
-                                    const posicion = posiciones.search('7');
-                                    posiciones.substring(posicion, posiciones.length - 1)
-                                    console.log( 'no adicion',posicion)
-                                }
-                                onPosicion(posiciones)
-                            }}
-                        />
-                    </Grid>
-                    <Grid item xl={4} lg={4} md={4} sm={4} xs={4}>
-                        <Paper
-                            sx={{
-                                height: 100,
-                                width: 'auto',
-                                background: posiciones.includes('8') ? '#E8E8E8' : '#FFFFFF'
-                            }}
-                            onClick={() => {
-                                if (!posiciones.includes('8')) {
-                                    posiciones += '8';
-                                    console.log('adicion')
-                                } else {
-                                    const posicion = posiciones.search('8');
-                                    posiciones.substring(posicion, posiciones.length - 1)
-                                    console.log('no adicion', posicion)
-                                }
-                            }}
-                        />
-                    </Grid>
+                    {
+                        imagen.map((img, i) => {
+                            return (
+                                <Grid item xl={4} lg={4} md={4} sm={4} xs={4} key={i}>
+                                    <Paper
+                                        sx={{
+                                            height: 100,
+                                            width: 'auto',
+                                            background: imagen[i].valor ? '#E8E8E8' : '#FFFFFF'
+                                        }}
+                                        onClick={() => {
+                                            imagen[i].valor = !imagen[i].valor;
+                                            setImagen(imagen);
+                                            const resultado = imagen.filter((ele, index) => {
+                                                return ele.valor == true
+                                            });
+                                            onPosicion((resultado.map(e => e.posicion)).toString())
+                                        }}
+                                    />
+                                </Grid>
+                            )
+                        })
+                    }
                 </Grid>
             </Grid>
         </Grid>
